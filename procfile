@@ -1,0 +1,2 @@
+web: gunicorn cases.wsgi --log-file -
+web: python manage.py migrate && gunicorn cases.wsg

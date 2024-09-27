@@ -1,0 +1,200 @@
+.container {
+    text-align: center;
+    margin-top: 50px;
+}
+
+.button-container {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.btn {
+    padding: 10px 20px;
+    text-decoration: none;
+    color: white;
+    border-radius: 5px;
+}
+
+.btn-primary {
+    background-color: #007bff;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+}
+
+.btn-info {
+    background-color: #17a2b8;
+}
+
+.btn-warning {
+    background-color: #ffc107;
+}
+
+.dashboard {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.button-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.button-container a {
+    margin-bottom: 10px;
+    width: 200px;
+    text-align: center;
+}
+
+.upcoming-cases {
+    width: 50%;
+}
+
+.upcoming-cases h2 {
+    margin-bottom: 20px;
+}
+
+.upcoming-cases ul {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.upcoming-cases li {
+    margin-bottom: 10px;
+}
+
+/* Responsive Design for Small Screens */
+@media (max-width: 600px) {
+    .button-container a {
+        width: 50px;
+        font-size: 0.8rem;
+        padding: 5px;
+        text-align: center;
+        text-transform: uppercase;
+    }
+
+    .button-container a::after {
+        content: attr(data-short);
+        font-weight: bold;
+    }
+
+    .button-container a {
+        background-color: transparent;
+        border: 2px solid transparent;
+        color: #000;
+        font-weight: bold;
+    }
+
+    .button-container a[data-short="A"] {
+        background-color: #007bff;
+        color: #fff;
+    }
+
+    .button-container a[data-short="V"] {
+        background-color: #6c757d;
+        color: #fff;
+    }
+
+    .button-container a[data-short="T"] {
+        background-color: #17a2b8;
+        color: #fff;
+    }
+
+    .button-container a[data-short="U"] {
+        background-color: #ffc107;
+        color: #fff;
+    }
+}
+
+.dashboard-image {
+    width: 100px; /* Adjust as needed */
+    height: auto; /* Maintain aspect ratio */
+    display: block;
+    margin: 0 auto;
+    /* Add additional styling as needed */
+}
+
+/* Ensure the navbar is displayed as a flex container */
+.navbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* Distributes space between items */
+    padding: 10px;
+    background-color: #f8f9fa; /* Example background color */
+}
+
+/* Style the image */
+.dashboard-image {
+    width: 100px; /* Adjust size as needed */
+    height: auto; /* Maintain aspect ratio */
+    /* Add any additional styling if needed */
+}
+
+/* Style the link to the image */
+.dashboard-link {
+    margin-right: auto; /* Pushes the link to the left */
+}
+
+/* Add this to your static CSS file */
+.table th, .table td {
+    text-align: center;
+}
+
+.table thead {
+    background-color: #343a40;
+    color: #ffffff;
+}
+
+.table tbody tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+.btn-custom {
+    font-size: 0.9rem;
+    padding: 10px 20px;
+    border-radius: 5px;
+}
+
+/* Add this to your static CSS file */
+.table th, .table td {
+    text-align: center;
+}
+
+.table thead {
+    background-color: #343a40; /* Dark background for the header */
+    color: #ffffff; /* White text color */
+}
+
+.table tbody tr:nth-child(even) {
+    background-color: #f2f2f2; /* Light grey background for even rows */
+}
+
+.btn {
+    font-size: 0.8rem; /* Slightly smaller font size for buttons */
+    padding: 5px 10px; /* Adjust padding for better fit */
+    border-radius: 4px; /* Slightly rounded corners */
+}
+
+.btn-info {
+    background-color: #17a2b8; /* Info button color */
+    border-color: #17a2b8; /* Border color for info button */
+}
+
+.btn-warning {
+    background-color: #ffc107; /* Warning button color */
+    border-color: #ffc107; /* Border color for warning button */
+}
+
+.btn-danger {
+    background-color: #dc3545; /* Danger button color */
+    border-color: #dc3545; /* Border color for danger button */
+}
+
+.btn-info:hover, .btn-warning:hover, .btn-danger:hover {
+    opacity: 0.8; /* Slightly transparent on hover */
+}
+

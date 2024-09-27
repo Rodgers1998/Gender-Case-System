@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Case Detail</h2>
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Case Information</h5>
+            <dl class="row">
+                <dt class="col-sm-4">Case Number:</dt>
+                <dd class="col-sm-8">{{ case.case_number }}</dd>
+
+                <dt class="col-sm-4">Case Type:</dt>
+                <dd class="col-sm-8">{{ case.case_type }}</dd>
+
+                <dt class="col-sm-4">Accused Name:</dt>
+                <dd class="col-sm-8">{{ case.accused_name }}</dd>
+
+                <dt class="col-sm-4">Accuser Name:</dt>
+                <dd class="col-sm-8">{{ case.accuser_name }}</dd>
+
+                <dt class="col-sm-4">Accuser Phone:</dt>
+                <dd class="col-sm-8">{{ case.accuser_phone }}</dd>
+
+                <dt class="col-sm-4">Court Date:</dt>
+                <dd class="col-sm-8">{{ case.court_date }}</dd>
+
+                <dt class="col-sm-4">Next Court Date:</dt>
+                <dd class="col-sm-8">{{ case.next_court_date }}</dd>
+
+                <dt class="col-sm-4">Investigating Officer:</dt>
+                <dd class="col-sm-8">{{ case.investigating_officer }}</dd>
+
+                <dt class="col-sm-4">Investigating Officer Phone NO:</dt>
+                <dd class="col-sm-8">{{ case.investigating_officer_phone }}</dd>
+
+                <dt class="col-sm-4">Location:</dt>
+                <dd class="col-sm-8">{{ case.location }}</dd>
+            </dl>
+            <div class="mt-4">
+                <a href="{% url 'case_update' case.pk %}" class="btn btn-warning btn-lg">Edit Case</a>
+                <a href="{% url 'case_delete' case.pk %}" class="btn btn-danger btn-lg">Delete Case</a>
+                <a href="{% url 'case_list' %}" class="btn btn-secondary btn-lg">Back to List</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Are you sure you want to delete this case?</h2>
+<p><strong>{{ case.case_number }}</strong></p>
+<form method="post">
+    {% csrf_token %}
+    <button type="submit">Confirm</button>
+</form>
+<a href="{% url 'case_list' %}">Cancel</a>
+{% endblock %}
