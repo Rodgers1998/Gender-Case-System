@@ -25,8 +25,8 @@ SECRET_KEY = 'django-insecure-q$4tw=+++m8ryb*cbfxoz8+9)i99m!fy3pl!6n7fw7jtwk(x)b
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
-CSRF_TRUSTED_ORIGINS =[]
+ALLOWED_HOSTS = ['gender-case-system.up.railway.app', 'https://gender-case-system.up.railway.app']
+CSRF_TRUSTED_ORIGINS =['gender-case-system.up.railway.app', 'https://gender-case-system.up.railway.app']
 
 # Application definition
 
