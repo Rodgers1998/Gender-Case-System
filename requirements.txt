@@ -39,7 +39,7 @@ dash-bootstrap-components==1.6.0
 dash-core-components==2.0.0
 dash-html-components==2.0.0
 dash-table==5.0.0
-debugpy==1.8.3
+debugpy
 decorator==5.1.1
 defusedxml==0.7.1
 dj-database-url==2.2.0
