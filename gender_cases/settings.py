@@ -16,11 +16,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-q$4tw=+++m8ryb*cbfxoz8+9)i99m!fy3pl!6n7fw7jtwk(x)b'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 
 
-ALLOWED_HOSTS = ['gender-cases-bdad1a0e7e53.herokuapp.com']
+# ALLOWED_HOSTS = ['gender-cases-bdad1a0e7e53.herokuapp.com']
+
+ALLOWED_HOSTS = ['gender-cases-bdad1a0e7e53.herokuapp.com', 'localhost', '127.0.0.1']
+
 
 # Application definition
 
@@ -91,8 +94,12 @@ WSGI_APPLICATION = 'gender_cases.wsgi.application'
 
 import dj_database_url
 
+# DATABASES = {
+#     'default': dj_database_url.config(default='postgres://localhost/mydb')
+# }
+
 DATABASES = {
-    'default': dj_database_url.config(default='postgres://localhost/mydb')
+    'default': dj_database_url.config(conn_max_age=600, ssl_require=True)
 }
 
 
@@ -130,9 +137,10 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
-STATIC_URL = 'static/'
-STATICFILES_STORAGE='whitenoise.storage.CompressedManifestStaticFilesStorage'
-STATIC_ROOT= BASE_DIR / 'staticfiles'
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
