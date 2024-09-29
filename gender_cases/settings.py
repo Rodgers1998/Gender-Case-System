@@ -16,7 +16,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-q$4tw=+++m8ryb*cbfxoz8+9)i99m!fy3pl!6n7fw7jtwk(x)b'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 # ALLOWED_HOSTS = ['https://gender-cases-system-a26021b295f0.herokuapp.com/']
 # CSRF_TRUSTED_ORIGINS =['https://gender-cases-system-a26021b295f0.herokuapp.com/']
@@ -84,17 +84,17 @@ WSGI_APPLICATION = 'gender_cases.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
-
-# import dj_database_url
 # DATABASES = {
-#     'default': dj_database_url.config(default='postgres://localhost/mydb')
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
 # }
+
+import dj_database_url
+DATABASES = {
+    'default': dj_database_url.config(default='postgres://localhost/mydb')
+}
 
 
 # Password validation
