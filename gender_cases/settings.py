@@ -21,8 +21,7 @@ DEBUG = False
 # ALLOWED_HOSTS = ['https://gender-cases-system-a26021b295f0.herokuapp.com/']
 # CSRF_TRUSTED_ORIGINS =['https://gender-cases-system-a26021b295f0.herokuapp.com/']
 
-ALLOWED_HOSTS = []
-CSRF_TRUSTED_ORIGINS =[]
+ALLOWED_HOSTS = ['https://gender-cases-bdad1a0e7e53.herokuapp.com/']
 
 # Application definition
 
