@@ -18,10 +18,9 @@ SECRET_KEY = 'django-insecure-q$4tw=+++m8ryb*cbfxoz8+9)i99m!fy3pl!6n7fw7jtwk(x)b
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-# ALLOWED_HOSTS = ['https://gender-cases-system-a26021b295f0.herokuapp.com/']
-# CSRF_TRUSTED_ORIGINS =['https://gender-cases-system-a26021b295f0.herokuapp.com/']
 
-ALLOWED_HOSTS = ['https://gender-cases-bdad1a0e7e53.herokuapp.com/']
+
+ALLOWED_HOSTS = ['gender-cases-bdad1a0e7e53.herokuapp.com']
 
 # Application definition
 
@@ -91,6 +90,7 @@ WSGI_APPLICATION = 'gender_cases.wsgi.application'
 # }
 
 import dj_database_url
+
 DATABASES = {
     'default': dj_database_url.config(default='postgres://localhost/mydb')
 }
