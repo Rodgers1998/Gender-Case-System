@@ -17,6 +17,8 @@
                 <th>Case Number</th>
                 <th>Case Type</th>
                 <th>Accuser Name</th>
+                <th>Court Name</th> <!-- Newly added -->
+                <th>Stage of Case</th> <!-- Newly added -->
                 <th>Actions</th>
             </tr>
         </thead>
@@ -26,6 +28,8 @@
                     <td>{{ case.case_number }}</td>
                     <td>{{ case.case_type }}</td>
                     <td>{{ case.accuser_name }}</td>
+                    <td>{{ case.court_name }}</td> <!-- Newly added -->
+                    <td>{{ case.get_stage_of_case_display }}</td> <!-- Newly added -->
                     <td>
                         <a href="{% url 'case_detail' case.pk %}" class="btn btn-info btn-sm">View</a>
                         <a href="{% url 'case_update' case.pk %}" class="btn btn-warning btn-sm">Edit</a>
@@ -34,7 +38,7 @@
                 </tr>
             {% empty %}
                 <tr>
-                    <td colspan="4" class="text-center">No cases available.</td>
+                    <td colspan="6" class="text-center">No cases available.</td>
                 </tr>
             {% endfor %}
         </tbody>

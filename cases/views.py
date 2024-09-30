@@ -1,13 +1,8 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import Case
 from .forms import CaseForm
-
-from django.shortcuts import render
-from .models import Case
 from datetime import date
-
 from django.db.models import Q
-
 
 def home(request):
     query = request.GET.get('q')
@@ -22,14 +17,12 @@ def home(request):
             Q(accuser_phone__icontains=query) |
             Q(investigating_officer__icontains=query) |
             Q(investigating_officer_phone__icontains=query) |
-            Q(location__icontains=query)
+            Q(location__icontains=query) |
+            Q(court_name__icontains=query) |  # Added field for Court Name
+            Q(stage_of_case__icontains=query)  # Added field for Stage of Case
         )
 
     return render(request, 'cases/home.html', {'upcoming_cases': upcoming_cases})
-
-
-
-
 
 
 def case_list(request):
@@ -45,7 +38,9 @@ def case_list(request):
             Q(accuser_phone__icontains=query) |
             Q(investigating_officer__icontains=query) |
             Q(investigating_officer_phone__icontains=query) |
-            Q(location__icontains=query)
+            Q(location__icontains=query) |
+            Q(court_name__icontains=query) |  # Added field for Court Name
+            Q(stage_of_case__icontains=query)  # Added field for Stage of Case
         )
 
     return render(request, 'cases/case_list.html', {'cases': cases})
@@ -54,6 +49,7 @@ def case_list(request):
 def case_detail(request, pk):
     case = get_object_or_404(Case, pk=pk)
     return render(request, 'cases/case_detail.html', {'case': case})
+
 
 def case_create(request):
     if request.method == 'POST':
@@ -66,7 +62,6 @@ def case_create(request):
     return render(request, 'cases/case_form.html', {'form': form})
 
 
-
 def case_update(request, pk):
     case = get_object_or_404(Case, pk=pk)
     if request.method == 'POST':
@@ -77,6 +72,7 @@ def case_update(request, pk):
     else:
         form = CaseForm(instance=case)
     return render(request, 'cases/case_form.html', {'form': form})
+
 
 def case_delete(request, pk):
     case = get_object_or_404(Case, pk=pk)

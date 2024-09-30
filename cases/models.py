@@ -53,16 +53,28 @@ class Case(models.Model):
         # Add more locations as needed
     ]
 
+    STAGE_OF_CASE_CHOICES = [
+        ('defence hearing', 'Defence Hearing'),
+        ('withdrawn', 'Withdrawn'),
+        ('hearing', 'Hearing'),
+        ('judgement', 'Judgement'),
+        ('mention', 'Mention'),
+        ('rulling', 'Rulling'),
+    ]
+
     case_number = models.CharField(max_length=100, unique=True)
     case_type = models.CharField(max_length=100, choices=CASE_TYPE_CHOICES)
     accused_name = models.CharField(max_length=255)
     accuser_name = models.CharField(max_length=255)
     accuser_phone = models.CharField(max_length=15)
+    court_name = models.CharField(max_length=255)  # Court Name field
     court_date = models.DateField()  # DateField for selecting date
     next_court_date = models.DateField()  # Another DateField
     investigating_officer = models.CharField(max_length=255)
     investigating_officer_phone = models.CharField(max_length=15)
+    stage_of_case = models.CharField(max_length=50, choices=STAGE_OF_CASE_CHOICES)  # Dropdown for stage of case
     location = models.CharField(max_length=255, choices=LOCATION_CHOICES)
+    
 
     def __str__(self):
         return self.case_number

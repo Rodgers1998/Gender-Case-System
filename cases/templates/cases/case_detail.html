@@ -22,6 +22,9 @@
                 <dt class="col-sm-4">Accuser Phone:</dt>
                 <dd class="col-sm-8">{{ case.accuser_phone }}</dd>
 
+                <dt class="col-sm-4">Court Name:</dt>
+                <dd class="col-sm-8">{{ case.court_name }}</dd>
+
                 <dt class="col-sm-4">Court Date:</dt>
                 <dd class="col-sm-8">{{ case.court_date }}</dd>
 
@@ -34,9 +37,15 @@
                 <dt class="col-sm-4">Investigating Officer Phone NO:</dt>
                 <dd class="col-sm-8">{{ case.investigating_officer_phone }}</dd>
 
+                <dt class="col-sm-4">Stage of Case:</dt>
+                <dd class="col-sm-8">{{ case.get_stage_of_case_display }}</dd>
+
                 <dt class="col-sm-4">Location:</dt>
                 <dd class="col-sm-8">{{ case.location }}</dd>
+
+                
             </dl>
+
             <div class="mt-4">
                 <a href="{% url 'case_update' case.pk %}" class="btn btn-warning btn-lg">Edit Case</a>
                 <a href="{% url 'case_delete' case.pk %}" class="btn btn-danger btn-lg">Delete Case</a>
