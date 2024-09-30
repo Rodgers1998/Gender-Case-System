@@ -28,6 +28,7 @@
         </div>
 
         <!-- Upcoming Cases displayed on the right -->
+        <!-- Upcoming Cases displayed on the right -->
         <div class="upcoming-cases mt-4">
             <h2>Top 5 Upcoming Cases</h2>
 
@@ -41,7 +42,7 @@
                 <thead>
                     <tr>
                         <th>Case Number</th>
-                        <th>Court Date</th>
+                        <th>Next Court Date</th>  <!-- Updated header -->
                         <th>Details</th>
                     </tr>
                 </thead>
@@ -49,7 +50,7 @@
                     {% for case in upcoming_cases %}
                     <tr>
                         <td>{{ case.case_number }}</td>
-                        <td>{{ case.court_date }}</td>
+                        <td>{{ case.next_court_date }}</td>  <!-- Updated field -->
                         <td><a href="{% url 'case_detail' case.pk %}" class="btn btn-info btn-sm">View Details</a></td>
                     </tr>
                     {% empty %}
@@ -59,8 +60,8 @@
                     {% endfor %}
                 </tbody>
             </table>
-            
         </div>
+
     </div>
 </div>
 {% endblock %}
