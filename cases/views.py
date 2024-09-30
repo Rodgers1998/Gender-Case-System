@@ -4,10 +4,14 @@ from .forms import CaseForm
 from datetime import date
 from django.db.models import Q
 
+
 def home(request):
     query = request.GET.get('q')
-    upcoming_cases = Case.objects.filter(court_date__gte=date.today()).order_by('court_date')[:5]
+    
+    # Filter for upcoming cases based on the next_court_date
+    upcoming_cases = Case.objects.filter(next_court_date__gte=date.today()).order_by('next_court_date')[:5]
 
+    # If a search query is provided, filter based on it
     if query:
         upcoming_cases = upcoming_cases.filter(
             Q(case_number__icontains=query) |
@@ -22,7 +26,9 @@ def home(request):
             Q(stage_of_case__icontains=query)  # Added field for Stage of Case
         )
 
+    # Render the home template with upcoming cases
     return render(request, 'cases/home.html', {'upcoming_cases': upcoming_cases})
+
 
 
 def case_list(request):
