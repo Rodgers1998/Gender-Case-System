@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'crispy_forms',
     'crispy_bootstrap5',
     'whitenoise.runserver_nostatic',
+    # 'cases.auth',
 ]
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
@@ -53,6 +54,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
+    'cases.middleware.LoginRequiredMiddleware',
 ]
 
 ROOT_URLCONF = 'gender_cases.urls'
@@ -140,6 +142,12 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'home'  # After login, redirect to home page
+
+LOGIN_REDIRECT_URL = 'home'  # Redirect to home after login
+
 
 
 # Default primary key field type

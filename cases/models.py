@@ -1,4 +1,8 @@
 from django.db import models
+from django.contrib.auth.models import User
+from django.conf import settings
+
+    
 
 class Case(models.Model):
     CASE_TYPE_CHOICES = [
@@ -61,7 +65,7 @@ class Case(models.Model):
         ('mention', 'Mention'),
         ('rulling', 'Rulling'),
     ]
-
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     case_number = models.CharField(max_length=100, unique=True)
     case_type = models.CharField(max_length=100, choices=CASE_TYPE_CHOICES)
     accused_name = models.CharField(max_length=255)

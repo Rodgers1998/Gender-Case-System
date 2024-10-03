@@ -4,7 +4,26 @@ from .forms import CaseForm
 from datetime import date
 from django.db.models import Q
 
+from django.shortcuts import render, redirect
+from django.contrib.auth import login
+from .forms import UserRegistrationForm
 
+from django.contrib.auth.decorators import login_required
+
+
+def register(request):
+    if request.method == 'POST':
+        form = UserRegistrationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('login')
+    else:
+        form = UserRegistrationForm()
+    return render(request, 'register.html', {'form': form})
+
+
+
+@login_required
 def home(request):
     query = request.GET.get('q')
     

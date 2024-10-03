@@ -1,6 +1,38 @@
 from django import forms
 from .models import Case
 
+
+from django.contrib.auth.models import User
+
+
+
+class UserRegistrationForm(forms.ModelForm):
+    password = forms.CharField(label='Password', widget=forms.PasswordInput)
+    password2 = forms.CharField(label='Repeat password', widget=forms.PasswordInput)
+
+    class Meta:
+        model = User
+        fields = ('username', 'first_name', 'email', 'password', 'password2')
+        help_texts = {
+            'username': '',  # Remove help text for username
+            'first_name': '',  # Remove help text for first_name
+            'email': '',  # Remove help text for email
+        }
+
+    def clean_password2(self):
+        cd = self.cleaned_data
+        if cd['password'] != cd['password2']:
+            raise forms.ValidationError('Passwords don’t match.')
+        return cd['password2']
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.set_password(self.cleaned_data['password'])  # Set the user's password
+        if commit:
+            user.save()
+        return user
+
+
 class CaseForm(forms.ModelForm):
     class Meta:
         model = Case
