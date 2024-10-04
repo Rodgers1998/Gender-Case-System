@@ -57,29 +57,33 @@ def home(request):
             Q(stage_of_case__icontains=query)  # Added field for Stage of Case
         )
 
-    # Render the home template with upcoming cases
+    # Limit to the top 5 upcoming cases after filtering
+    upcoming_cases = upcoming_cases[:5]
+
+    # Render the home template with the filtered upcoming cases
     return render(request, 'cases/home.html', {'upcoming_cases': upcoming_cases})
 
 
 
 
-@login_required
+
+
+
+from django.core.paginator import Paginator
+
 def case_list(request):
     query = request.GET.get('q')
 
-    # If the user is an admin (superuser), show all cases
     if request.user.is_superuser:
-        cases = Case.objects.all()
+        cases = Case.objects.all().order_by('-next_court_date')
     else:
-        # If the user is not an admin, show only their own cases
-        cases = Case.objects.filter(user=request.user)
+        cases = Case.objects.filter(user=request.user).order_by('-next_court_date')
 
-    # Search functionality
     if query:
-        cases = cases.filter(
+        upcoming_cases = upcoming_cases.filter(
             Q(case_number__icontains=query) |
             Q(case_type__icontains=query) |
-            Q(accused_name__icontains(query)) |
+            Q(accused_name__icontains=query) |
             Q(accuser_name__icontains=query) |
             Q(accuser_phone__icontains=query) |
             Q(investigating_officer__icontains=query) |
@@ -89,7 +93,13 @@ def case_list(request):
             Q(stage_of_case__icontains=query)  # Added field for Stage of Case
         )
 
+    # Pagination - Show 10 cases per page
+    paginator = Paginator(cases, 10)
+    page_number = request.GET.get('page')
+    cases = paginator.get_page(page_number)
+
     return render(request, 'cases/case_list.html', {'cases': cases})
+
 
 
 
