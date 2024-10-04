@@ -21,14 +21,26 @@ def register(request):
         form = UserRegistrationForm()
     return render(request, 'register.html', {'form': form})
 
+from django.contrib.auth import logout
+
+def custom_logout(request):
+    logout(request)  # Log the user out
+    return render(request, 'cases/logout.html')  # Render your custom logout template
+
+
 
 
 @login_required
 def home(request):
     query = request.GET.get('q')
-    
+
     # Filter for upcoming cases based on the next_court_date
-    upcoming_cases = Case.objects.filter(next_court_date__gte=date.today()).order_by('next_court_date')[:5]
+    if request.user.is_superuser:
+        # Admin (superuser) can view all upcoming cases
+        upcoming_cases = Case.objects.filter(next_court_date__gte=date.today()).order_by('next_court_date')
+    else:
+        # Normal user can only see their own upcoming cases
+        upcoming_cases = Case.objects.filter(user=request.user, next_court_date__gte=date.today()).order_by('next_court_date')
 
     # If a search query is provided, filter based on it
     if query:
@@ -50,15 +62,24 @@ def home(request):
 
 
 
+
+@login_required
 def case_list(request):
     query = request.GET.get('q')
-    cases = Case.objects.all()
 
+    # If the user is an admin (superuser), show all cases
+    if request.user.is_superuser:
+        cases = Case.objects.all()
+    else:
+        # If the user is not an admin, show only their own cases
+        cases = Case.objects.filter(user=request.user)
+
+    # Search functionality
     if query:
         cases = cases.filter(
             Q(case_number__icontains=query) |
             Q(case_type__icontains=query) |
-            Q(accused_name__icontains=query) |
+            Q(accused_name__icontains(query)) |
             Q(accuser_name__icontains=query) |
             Q(accuser_phone__icontains=query) |
             Q(investigating_officer__icontains=query) |
@@ -71,20 +92,26 @@ def case_list(request):
     return render(request, 'cases/case_list.html', {'cases': cases})
 
 
+
 def case_detail(request, pk):
     case = get_object_or_404(Case, pk=pk)
     return render(request, 'cases/case_detail.html', {'case': case})
 
 
+
+@login_required
 def case_create(request):
     if request.method == 'POST':
         form = CaseForm(request.POST)
         if form.is_valid():
-            form.save()
-            return redirect('case_list')
+            case = form.save(commit=False)  # Don't save to the database yet
+            case.user = request.user  # Assign the current logged-in user
+            case.save()  # Now save the case to the database
+            return redirect('case_list')  # Redirect to the case list or another view
     else:
         form = CaseForm()
     return render(request, 'cases/case_form.html', {'form': form})
+
 
 
 def case_update(request, pk):
