@@ -10,6 +10,9 @@ from .forms import UserRegistrationForm
 
 from django.contrib.auth.decorators import login_required
 
+from django.core.paginator import Paginator
+
+
 
 def register(request):
     if request.method == 'POST':
@@ -69,16 +72,24 @@ def home(request):
 
 
 
-from django.core.paginator import Paginator
 
+
+@login_required
 def case_list(request):
     query = request.GET.get('q')
 
-    if request.user.is_superuser:
-        cases = Case.objects.all().order_by('-next_court_date')
-    else:
-        cases = Case.objects.filter(user=request.user).order_by('-next_court_date')
+    # Initialize the variable to avoid UnboundLocalError
+    upcoming_cases = None
 
+    if request.user.is_superuser:
+        # Admin (superuser) can view all upcoming cases
+        upcoming_cases = Case.objects.filter(next_court_date__gte=date.today()).order_by('next_court_date')
+    else:
+        # Normal user can only see their own upcoming cases
+        upcoming_cases = Case.objects.filter(user=request.user, next_court_date__gte=date.today()).order_by('next_court_date')
+
+    # If a search query is provided, filter based on it
+    
     if query:
         upcoming_cases = upcoming_cases.filter(
             Q(case_number__icontains=query) |
@@ -92,13 +103,14 @@ def case_list(request):
             Q(court_name__icontains=query) |  # Added field for Court Name
             Q(stage_of_case__icontains=query)  # Added field for Stage of Case
         )
-
     # Pagination - Show 10 cases per page
-    paginator = Paginator(cases, 10)
+    paginator = Paginator(upcoming_cases, 10)  # Ensure upcoming_cases is passed here
     page_number = request.GET.get('page')
     cases = paginator.get_page(page_number)
 
+    # Render the home template with upcoming cases
     return render(request, 'cases/case_list.html', {'cases': cases})
+
 
 
 
