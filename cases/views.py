@@ -3,16 +3,10 @@ from .models import Case
 from .forms import CaseForm
 from datetime import date
 from django.db.models import Q
-
-from django.shortcuts import render, redirect
-from django.contrib.auth import login
+from django.contrib.auth import login, logout
 from .forms import UserRegistrationForm
-
 from django.contrib.auth.decorators import login_required
-
 from django.core.paginator import Paginator
-
-
 
 def register(request):
     if request.method == 'POST':
@@ -24,15 +18,9 @@ def register(request):
         form = UserRegistrationForm()
     return render(request, 'register.html', {'form': form})
 
-from django.contrib.auth import logout
-
 def custom_logout(request):
     logout(request)  # Log the user out
     return render(request, 'cases/logout.html')  # Render your custom logout template
-
-
-
-
 
 @login_required
 def home(request):
@@ -58,7 +46,9 @@ def home(request):
             Q(investigating_officer_phone__icontains=query) |
             Q(location__icontains=query) |
             Q(court_name__icontains=query) |  # Added field for Court Name
-            Q(stage_of_case__icontains=query)  # Added field for Stage of Case
+            Q(stage_of_case__icontains=query) |  # Added field for Stage of Case
+            Q(ward__icontains=query) |  # Added field for Ward
+            Q(police_station__icontains=query)  # Added field for Police Station
         )
 
     # Limit to the top 5 upcoming cases after filtering
@@ -66,15 +56,6 @@ def home(request):
 
     # Render the home template with the filtered upcoming cases
     return render(request, 'cases/home.html', {'upcoming_cases': upcoming_cases})
-
-
-
-
-
-
-
-
-
 
 @login_required
 def case_list(request):
@@ -91,7 +72,6 @@ def case_list(request):
         upcoming_cases = Case.objects.filter(user=request.user, next_court_date__gte=date.today()).order_by('next_court_date')
 
     # If a search query is provided, filter based on it
-    
     if query:
         upcoming_cases = upcoming_cases.filter(
             Q(case_number__icontains=query) |
@@ -103,8 +83,11 @@ def case_list(request):
             Q(investigating_officer_phone__icontains=query) |
             Q(location__icontains=query) |
             Q(court_name__icontains=query) |  # Added field for Court Name
-            Q(stage_of_case__icontains=query)  # Added field for Stage of Case
+            Q(stage_of_case__icontains=query) |  # Added field for Stage of Case
+            Q(ward__icontains=query) |  # Added field for Ward
+            Q(police_station__icontains=query)  # Added field for Police Station
         )
+    
     # Pagination - Show 10 cases per page
     paginator = Paginator(upcoming_cases, 10)  # Ensure upcoming_cases is passed here
     page_number = request.GET.get('page')
@@ -113,15 +96,9 @@ def case_list(request):
     # Render the home template with upcoming cases
     return render(request, 'cases/case_list.html', {'cases': cases})
 
-
-
-
-
 def case_detail(request, pk):
     case = get_object_or_404(Case, pk=pk)
     return render(request, 'cases/case_detail.html', {'case': case})
-
-
 
 @login_required
 def case_create(request):
@@ -136,8 +113,6 @@ def case_create(request):
         form = CaseForm()
     return render(request, 'cases/case_form.html', {'form': form})
 
-
-
 def case_update(request, pk):
     case = get_object_or_404(Case, pk=pk)
     if request.method == 'POST':
@@ -148,7 +123,6 @@ def case_update(request, pk):
     else:
         form = CaseForm(instance=case)
     return render(request, 'cases/case_form.html', {'form': form})
-
 
 def case_delete(request, pk):
     case = get_object_or_404(Case, pk=pk)

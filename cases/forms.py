@@ -1,10 +1,6 @@
 from django import forms
 from .models import Case
-
-
 from django.contrib.auth.models import User
-
-
 
 class UserRegistrationForm(forms.ModelForm):
     password = forms.CharField(label='Password', widget=forms.PasswordInput)
@@ -42,14 +38,16 @@ class CaseForm(forms.ModelForm):
             'accused_name', 
             'accuser_name', 
             'accuser_phone', 
-            'court_name',  # New field
+            'court_name',  
             'court_date', 
             'next_court_date', 
+            'police_station',  # Add police station to the fields
             'investigating_officer', 
             'investigating_officer_phone', 
-            'stage_of_case',  # New field
+            'stage_of_case',  
             'location',
-
+            'ward',  # Add ward to the fields
+            
         ]
         widgets = {
             'case_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter Case Number'}),
@@ -57,13 +55,14 @@ class CaseForm(forms.ModelForm):
             'accused_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter Accused Name'}),
             'accuser_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter Accuser Name'}),
             'accuser_phone': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter Accuser Phone'}),
-            'court_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter Court Name'}),  # New field
+            'court_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter Court Name'}),  
             'court_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
             'next_court_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'police_station': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter Police Station'}),  # New field for police station
             'investigating_officer': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter Officer Name'}),
             'investigating_officer_phone': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter Officer Phone'}),
             'stage_of_case': forms.Select(attrs={'class': 'form-control'}),  # Dropdown for stage of case
             'location': forms.Select(attrs={'class': 'form-control'}),  # Dropdown for locations
-            
+            'ward': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter Ward'}),  # New field for ward
             
         }

@@ -74,11 +74,13 @@ class Case(models.Model):
     court_name = models.CharField(max_length=255)  # Court Name field
     court_date = models.DateField()  # DateField for selecting date
     next_court_date = models.DateField()  # Another DateField
+    police_station = models.CharField(max_length=255, null=True) 
     investigating_officer = models.CharField(max_length=255)
     investigating_officer_phone = models.CharField(max_length=15)
     stage_of_case = models.CharField(max_length=100, choices=STAGE_OF_CASE_CHOICES)
   # Dropdown for stage of case
     location = models.CharField(max_length=255, choices=LOCATION_CHOICES)
+    ward = models.CharField(max_length=255, null=True) 
     
 
     def __str__(self):
