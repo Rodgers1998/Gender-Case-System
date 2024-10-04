@@ -36,13 +36,12 @@
                 </thead>
                 <tbody>
                     {% for case in upcoming_cases %}
-                    {% if case.user == request.user %}  <!-- Filter by user -->
+                    <!-- No filter by user here as superuser should see all cases -->
                     <tr>
                         <td>{{ case.case_number }}</td>
                         <td>{{ case.next_court_date }}</td>  <!-- Updated field -->
                         <td><a href="{% url 'case_detail' case.pk %}" class="btn btn-info btn-sm">View Details</a></td>
                     </tr>
-                    {% endif %}
                     {% empty %}
                     <tr>
                         <td colspan="3">No upcoming cases</td>

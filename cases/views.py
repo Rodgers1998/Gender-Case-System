@@ -33,6 +33,7 @@ def custom_logout(request):
 
 
 
+
 @login_required
 def home(request):
     query = request.GET.get('q')
@@ -45,7 +46,7 @@ def home(request):
         # Normal user can only see their own upcoming cases
         upcoming_cases = Case.objects.filter(user=request.user, next_court_date__gte=date.today()).order_by('next_court_date')
 
-    # If a search query is provided, filter based on it
+    # If a search query is provided, filter the upcoming cases based on it
     if query:
         upcoming_cases = upcoming_cases.filter(
             Q(case_number__icontains=query) |
@@ -65,6 +66,7 @@ def home(request):
 
     # Render the home template with the filtered upcoming cases
     return render(request, 'cases/home.html', {'upcoming_cases': upcoming_cases})
+
 
 
 
