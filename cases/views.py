@@ -62,14 +62,14 @@ def case_list(request):
     query = request.GET.get('q')
 
     # Initialize the variable to avoid UnboundLocalError
-    upcoming_cases = None
+    all_cases = None
 
     if request.user.is_superuser:
-        # Admin (superuser) can view all upcoming cases
-        upcoming_cases = Case.objects.filter(next_court_date__gte=date.today()).order_by('next_court_date')
+        # Admin (superuser) can view all cases, including those with past court dates
+        all_cases = Case.objects.all().order_by('next_court_date')
     else:
-        # Normal user can only see their own upcoming cases
-        upcoming_cases = Case.objects.filter(user=request.user, next_court_date__gte=date.today()).order_by('next_court_date')
+        # Normal user can only see their own cases, including past court dates
+        all_cases = Case.objects.filter(user=request.user).order_by('next_court_date')
 
     # If a search query is provided, filter based on it
     if query:
@@ -87,14 +87,15 @@ def case_list(request):
             Q(ward__icontains=query) |  # Added field for Ward
             Q(police_station__icontains=query)  # Added field for Police Station
         )
-    
+
     # Pagination - Show 10 cases per page
-    paginator = Paginator(upcoming_cases, 10)  # Ensure upcoming_cases is passed here
+    paginator = Paginator(all_cases, 10)  # Ensure all_cases is passed here
     page_number = request.GET.get('page')
     cases = paginator.get_page(page_number)
 
-    # Render the home template with upcoming cases
+    # Render the case list template with all cases
     return render(request, 'cases/case_list.html', {'cases': cases})
+
 
 def case_detail(request, pk):
     case = get_object_or_404(Case, pk=pk)
