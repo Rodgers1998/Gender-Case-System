@@ -61,8 +61,8 @@ def home(request):
 def case_list(request):
     query = request.GET.get('q')
 
-    # Initialize the variable to avoid UnboundLocalError
-    all_cases = None
+    # Initialize the variable to an empty queryset to avoid UnboundLocalError
+    all_cases = Case.objects.none()
 
     if request.user.is_superuser:
         # Admin (superuser) can view all cases, including those with past court dates
@@ -73,7 +73,7 @@ def case_list(request):
 
     # If a search query is provided, filter based on it
     if query:
-        upcoming_cases = upcoming_cases.filter(
+        all_cases = all_cases.filter(
             Q(case_number__icontains=query) |
             Q(case_type__icontains=query) |
             Q(accused_name__icontains=query) |
@@ -89,12 +89,13 @@ def case_list(request):
         )
 
     # Pagination - Show 10 cases per page
-    paginator = Paginator(all_cases, 10)  # Ensure all_cases is passed here
+    paginator = Paginator(all_cases, 10)
     page_number = request.GET.get('page')
     cases = paginator.get_page(page_number)
 
     # Render the case list template with all cases
     return render(request, 'cases/case_list.html', {'cases': cases})
+
 
 
 def case_detail(request, pk):
