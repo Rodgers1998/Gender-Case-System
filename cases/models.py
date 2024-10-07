@@ -1,14 +1,11 @@
 from django.db import models
 from django.contrib.auth.models import User
-from django.conf import settings
-
-    
 
 class Case(models.Model):
     CASE_TYPE_CHOICES = [
         ('abduction', 'Abduction'),
         ('defilement', 'Defilement'),
-        ('neglegence', 'Neglegence'),
+        ('neglegence', 'Negligence'),
         ('legal councelling', 'Legal Councelling'),
         ('emotional abuse', 'Emotional Abuse'),
         ('child abuse', 'Child Abuse'),
@@ -23,7 +20,6 @@ class Case(models.Model):
         ('sexual assault', 'Sexual Assault'),
         ('indicent act', 'Incident Act'),
         ('sexual harrassment', 'Sexual Harrassment'),
-        # Add more case types as needed
     ]
 
     LOCATION_CHOICES = [
@@ -54,7 +50,6 @@ class Case(models.Model):
         ('changamwe', 'Changamwe'),
         ('kwapunda', 'Kwapunda'),
         ('bahati', 'Bahati'),
-        # Add more locations as needed
     ]
 
     STAGE_OF_CASE_CHOICES = [
@@ -64,24 +59,27 @@ class Case(models.Model):
         ('judgement', 'Judgement'),
         ('mention', 'Mention'),
         ('rulling', 'Rulling'),
+        ('sentencing_3_years', 'Sentencing for 3 years'),  # Added
+        ('jailed_10_years', 'Jailed for 10 years'),  # Added
     ]
+
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     case_number = models.CharField(max_length=100, unique=True)
+    court_file_number = models.CharField(max_length=100, blank=True, null=True)  # Added court file number
     case_type = models.CharField(max_length=100, choices=CASE_TYPE_CHOICES)
     accused_name = models.CharField(max_length=255)
     accuser_name = models.CharField(max_length=255)
     accuser_phone = models.CharField(max_length=15)
-    court_name = models.CharField(max_length=255)  # Court Name field
-    court_date = models.DateField()  # DateField for selecting date
-    next_court_date = models.DateField()  # Another DateField
-    police_station = models.CharField(max_length=255, null=True) 
+    court_name = models.CharField(max_length=255)
+    court_date = models.DateField()
+    next_court_date = models.DateField()
+    police_station = models.CharField(max_length=255, null=True)
     investigating_officer = models.CharField(max_length=255)
     investigating_officer_phone = models.CharField(max_length=15)
     stage_of_case = models.CharField(max_length=100, choices=STAGE_OF_CASE_CHOICES)
-  # Dropdown for stage of case
+    sub_county = models.CharField(max_length=255, blank=True, null=True)  # Added Sub-County field
     location = models.CharField(max_length=255, choices=LOCATION_CHOICES)
-    ward = models.CharField(max_length=255, null=True) 
-    
+    ward = models.CharField(max_length=255, null=True)
 
     def __str__(self):
         return self.case_number
