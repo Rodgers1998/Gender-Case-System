@@ -7,8 +7,6 @@ from django.contrib.auth import login, logout
 from .forms import UserRegistrationForm
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
-
-import pdfkit
 from django.http import HttpResponse
 
 
