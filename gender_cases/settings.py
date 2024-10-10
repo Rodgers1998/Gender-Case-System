@@ -81,7 +81,6 @@ TEMPLATES = [
 ]
 
 
-
 WSGI_APPLICATION = 'gender_cases.wsgi.application'
 
 
@@ -141,8 +140,6 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [BASE_DIR / "static"]  # Ensure this line points to your static files directory
-
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
@@ -158,8 +155,6 @@ LOGIN_REDIRECT_URL = 'home'  # Redirect to home after login
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-PDFKIT_CONFIG = {
-    'wkhtmltopdf': os.path.join(os.getcwd(), 'path/to/wkhtmltopdf'),  # Adjust this path as needed
-}
+
 
 django_heroku.settings(locals())
