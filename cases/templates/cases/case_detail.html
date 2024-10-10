@@ -2,7 +2,7 @@
 
 {% block content %}
 <div class="container mt-4">
-    <!-- SHOFCO Image -->
+    <!-- SHOFCO Image (SHOULD WORK IF STATIC IS PROPERLY CONFIGURED) -->
     <div class="text-center">
         <img src="{% static 'images/shofco.png' %}" alt="SHOFCO Logo" class="img-fluid mb-4" style="max-width: 150px;">
     </div>
@@ -17,7 +17,7 @@
                 <dd class="col-sm-8">{{ case.case_number }}</dd>
 
                 <dt class="col-sm-4">Court File Number:</dt>
-                <dd class="col-sm-8">{{ case.court_file_number }}</dd> <!-- Added Court File Number -->
+                <dd class="col-sm-8">{{ case.court_file_number }}</dd>
 
                 <dt class="col-sm-4">Case Type:</dt>
                 <dd class="col-sm-8">{{ case.case_type }}</dd>
@@ -53,14 +53,13 @@
                 <dd class="col-sm-8">{{ case.get_stage_of_case_display }}</dd>
 
                 <dt class="col-sm-4">Sub-County:</dt>
-                <dd class="col-sm-8">{{ case.sub_county }}</dd> <!-- Added Sub-County -->
+                <dd class="col-sm-8">{{ case.sub_county }}</dd>
 
                 <dt class="col-sm-4">Location:</dt>
                 <dd class="col-sm-8">{{ case.location }}</dd>
 
                 <dt class="col-sm-4">Ward:</dt>
                 <dd class="col-sm-8">{{ case.ward }}</dd>
-                
             </dl>
 
             <div class="mt-4">
