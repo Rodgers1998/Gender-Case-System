@@ -2,11 +2,17 @@
 
 {% block content %}
 <div class="container mt-4">
+    <!-- SHOFCO Image -->
+    <div class="text-center">
+        <img src="{% static 'images/shofco.png' %}" alt="SHOFCO Logo" class="img-fluid mb-4" style="max-width: 150px;">
+    </div>
+
     <h2 class="mb-4">Case Detail</h2>
     <div class="card">
         <div class="card-body">
             <h5 class="card-title">Case Information</h5>
             <dl class="row">
+                <!-- Case Details Fields -->
                 <dt class="col-sm-4">Case Number:</dt>
                 <dd class="col-sm-8">{{ case.case_number }}</dd>
 
@@ -61,6 +67,9 @@
                 <a href="{% url 'case_update' case.pk %}" class="btn btn-warning btn-lg">Edit Case</a>
                 <a href="{% url 'case_delete' case.pk %}" class="btn btn-danger btn-lg">Delete Case</a>
                 <a href="{% url 'case_list' %}" class="btn btn-secondary btn-lg">Back to List</a>
+
+                <!-- Print Button -->
+                <button onclick="window.print()" class="btn btn-primary btn-lg">Print Case Details</button>
             </div>
         </div>
     </div>
