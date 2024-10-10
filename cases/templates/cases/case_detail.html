@@ -2,22 +2,16 @@
 
 {% block content %}
 <div class="container mt-4">
-    <!-- SHOFCO Image (SHOULD WORK IF STATIC IS PROPERLY CONFIGURED) -->
-    <div class="text-center">
-        <img src="{% static 'images/shofco.png' %}" alt="SHOFCO Logo" class="img-fluid mb-4" style="max-width: 150px;">
-    </div>
-
     <h2 class="mb-4">Case Detail</h2>
     <div class="card">
         <div class="card-body">
             <h5 class="card-title">Case Information</h5>
             <dl class="row">
-                <!-- Case Details Fields -->
                 <dt class="col-sm-4">Case Number:</dt>
                 <dd class="col-sm-8">{{ case.case_number }}</dd>
 
                 <dt class="col-sm-4">Court File Number:</dt>
-                <dd class="col-sm-8">{{ case.court_file_number }}</dd>
+                <dd class="col-sm-8">{{ case.court_file_number }}</dd> <!-- Added Court File Number -->
 
                 <dt class="col-sm-4">Case Type:</dt>
                 <dd class="col-sm-8">{{ case.case_type }}</dd>
@@ -53,22 +47,20 @@
                 <dd class="col-sm-8">{{ case.get_stage_of_case_display }}</dd>
 
                 <dt class="col-sm-4">Sub-County:</dt>
-                <dd class="col-sm-8">{{ case.sub_county }}</dd>
+                <dd class="col-sm-8">{{ case.sub_county }}</dd> <!-- Added Sub-County -->
 
                 <dt class="col-sm-4">Location:</dt>
                 <dd class="col-sm-8">{{ case.location }}</dd>
 
                 <dt class="col-sm-4">Ward:</dt>
                 <dd class="col-sm-8">{{ case.ward }}</dd>
+                
             </dl>
 
             <div class="mt-4">
                 <a href="{% url 'case_update' case.pk %}" class="btn btn-warning btn-lg">Edit Case</a>
                 <a href="{% url 'case_delete' case.pk %}" class="btn btn-danger btn-lg">Delete Case</a>
                 <a href="{% url 'case_list' %}" class="btn btn-secondary btn-lg">Back to List</a>
-
-                <!-- Print Button -->
-                <button onclick="window.print()" class="btn btn-primary btn-lg">Print Case Details</button>
             </div>
         </div>
     </div>
