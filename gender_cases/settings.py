@@ -81,6 +81,7 @@ TEMPLATES = [
 ]
 
 
+
 WSGI_APPLICATION = 'gender_cases.wsgi.application'
 
 
@@ -157,6 +158,8 @@ LOGIN_REDIRECT_URL = 'home'  # Redirect to home after login
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
+PDFKIT_CONFIG = {
+    'wkhtmltopdf': os.path.join(os.getcwd(), 'path/to/wkhtmltopdf'),  # Adjust this path as needed
+}
 
 django_heroku.settings(locals())

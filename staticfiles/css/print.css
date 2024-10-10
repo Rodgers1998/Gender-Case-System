@@ -1,0 +1,67 @@
+/* Hide buttons and unnecessary elements when printing */
+.no-print {
+    display: none !important;
+}
+
+/* Show elements meant for print only */
+.print-only {
+    display: none;
+}
+
+/* Hide logo in regular view, show it only during print */
+.print-logo {
+    display: none;
+}
+
+/* Print-specific rules */
+@media print {
+    /* Hide action buttons */
+    .no-print {
+        display: none !important;
+    }
+
+    /* Display print-only section */
+    .print-only {
+        display: block !important;
+    }
+
+    /* Ensure SHOFCO logo appears at the top of printed page */
+    .print-logo {
+        display: block !important;
+    }
+
+    /* Adjust the layout for printing */
+    body {
+        font-size: 14px;
+        margin: 0;
+        padding: 0;
+    }
+
+    .container {
+        width: 100%;
+        margin: 0;
+        padding: 0;
+    }
+
+    .card {
+        border: none;
+    }
+
+    /* Vertical alignment for signature section */
+    .signature-section {
+        margin-top: 40px;
+        text-align: left;
+        padding-left: 20px;
+    }
+
+    .signature-section p {
+        margin-bottom: 25px;
+        font-size: 16px;
+    }
+
+    /* Print view spacing for the SHOFCO logo */
+    img {
+        max-width: 200px;
+        margin-bottom: 20px;
+    }
+}

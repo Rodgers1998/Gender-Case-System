@@ -1,0 +1,54 @@
+{% load static %}
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Case Details</title>
+    <style>
+        /* Add your styles for the PDF here */
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .signature {
+            margin-top: 50px;
+            display: flex;
+            justify-content: space-between;
+        }
+    </style>
+</head>
+<body>
+    <div style="text-align: center;">
+        <img src="{% static 'images/shofco.png' %}" alt="SHOFCO Logo" style="width: 150px;"/>
+        <h1>Case Details</h1>
+    </div>
+    
+    <p><strong>Case Number:</strong> {{ case.case_number }}</p>
+    <p><strong>Court File Number:</strong> {{ case.court_file_number }}</p>
+    <p><strong>Case Type:</strong> {{ case.case_type }}</p>
+    <p><strong>Accused Name:</strong> {{ case.accused_name }}</p>
+    <p><strong>Accuser Name:</strong> {{ case.accuser_name }}</p>
+    <p><strong>Accuser Phone:</strong> {{ case.accuser_phone }}</p>
+    <p><strong>Court Name:</strong> {{ case.court_name }}</p>
+    <p><strong>Court Date:</strong> {{ case.court_date }}</p>
+    <p><strong>Next Court Date:</strong> {{ case.next_court_date }}</p>
+    <p><strong>Police Station:</strong> {{ case.police_station }}</p>
+    <p><strong>Investigating Officer:</strong> {{ case.investigating_officer }}</p>
+    <p><strong>Investigating Officer Phone NO:</strong> {{ case.investigating_officer_phone }}</p>
+    <p><strong>Stage of Case:</strong> {{ case.get_stage_of_case_display }}</p>
+    <p><strong>Location:</strong> {{ case.location }}</p>
+    <p><strong>Ward:</strong> {{ case.ward }}</p>
+
+    <div class="signature">
+        <div>
+            <p>____________________</p>
+            <p>Signature</p>
+        </div>
+        <div>
+            <p>____________________</p>
+            <p>Stamp</p>
+        </div>
+    </div>
+</body>
+</html>

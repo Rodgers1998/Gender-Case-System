@@ -8,6 +8,10 @@ from .forms import UserRegistrationForm
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 
+import pdfkit
+from django.http import HttpResponse
+
+
 def register(request):
     if request.method == 'POST':
         form = UserRegistrationForm(request.POST)
@@ -132,3 +136,99 @@ def case_delete(request, pk):
         case.delete()
         return redirect('case_list')
     return render(request, 'cases/case_confirm_delete.html', {'case': case})
+
+
+
+import os
+from django.conf import settings
+from django.http import HttpResponse
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
+from reportlab.lib import colors
+from reportlab.lib.units import inch
+from reportlab.platypus import Table, TableStyle
+from .models import Case  # Adjust based on your model's location
+
+def generate_case_pdf(request, case_id):
+    # Retrieve case details from the database
+    case = Case.objects.get(pk=case_id)
+
+    # Get the logged-in user (case officer)
+    case_officer = request.user.username  # Get the username of the logged-in user
+    
+    # Create a response with the PDF
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="case_{case_id}.pdf"'
+
+    # Create the PDF
+    p = canvas.Canvas(response, pagesize=letter)
+    width, height = letter
+
+    # Add SHOFCO Logo
+    logo_path = os.path.join(settings.STATIC_ROOT, 'images/shofco.png')  # Adjust the path based on your structure
+    if os.path.exists(logo_path):
+        p.drawImage(logo_path, 100, height - 100, width=2*inch, height=0.75*inch)  # Adjust the position and size
+
+    # Set the title
+    p.setFont("Helvetica-Bold", 18)
+    p.drawString(100, height - 150, "Case Detail")
+
+    # Set up the table for displaying case details in a structured format
+    case_details = [
+        ["Case Number:", case.case_number],
+        ["Court File Number:", case.court_file_number],
+        ["Case Type:", case.case_type],
+        ["Accused Name:", case.accused_name],
+        ["Accuser Name:", case.accuser_name],
+        ["Accuser Phone:", case.accuser_phone],
+        ["Court Name:", case.court_name],
+        ["Court Date:", str(case.court_date)],
+        ["Next Court Date:", str(case.next_court_date)],
+        ["Police Station:", case.police_station],
+        ["Investigating Officer:", case.investigating_officer],
+        ["Investigating Officer Phone No:", case.investigating_officer_phone],
+        ["Stage of Case:", case.get_stage_of_case_display()],
+        ["Location:", case.location],
+        ["Ward:", case.ward],
+    ]
+
+    # Convert the case details into a table format
+    table = Table(case_details, colWidths=[2.5 * inch, 4 * inch])  # Adjust column widths
+
+    # Add styling to the table
+    table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.lightgrey),  # Header background
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.black),  # Header text color
+        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),  # Align text to the left
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),  # Font for header
+        ('FONTSIZE', (0, 0), (-1, -1), 12),  # Font size
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 10),  # Padding below header
+        ('BACKGROUND', (0, 1), (-1, -1), colors.whitesmoke),  # Alternate row background
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.black),  # Grid lines
+    ]))
+
+    # Draw the table on the PDF
+    table.wrapOn(p, width, height)
+    table.drawOn(p, 100, height - 400)  # Adjust the position of the table
+
+    # Add case officer information
+    p.setFont("Helvetica", 12)
+    p.drawString(100, height - 430, f"Case Officer: {case_officer}")
+    p.drawString(300, height - 430, "Sign: ______________________")
+   
+    p.drawString(300, height - 500, "Stamp: ")
+
+    # Finalize the PDF
+    p.showPage()
+    p.save()
+
+    return response
+
+    # p.drawString(100, y, f"Case Officer: {case_officer}     Sign: _____________     Stamp: __________")
+    
+    # # Finalize the PDF
+    # p.showPage()
+    # p.save()
+
+    # return response
+
