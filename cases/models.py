@@ -78,7 +78,8 @@ class Case(models.Model):
     investigating_officer_phone = models.CharField(max_length=15)
     stage_of_case = models.CharField(max_length=100, choices=STAGE_OF_CASE_CHOICES)
     sub_county = models.CharField(max_length=255, blank=True, null=True)  # Added Sub-County field
-    location = models.CharField(max_length=255, choices=LOCATION_CHOICES)
+    location = models.CharField(max_length=255, choices=LOCATION_CHOICES, blank=True, null=True)
+
     ward = models.CharField(max_length=255, null=True)
 
     def __str__(self):

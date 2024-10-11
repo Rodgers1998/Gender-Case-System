@@ -222,11 +222,3 @@ def generate_case_pdf(request, case_id):
 
     return response
 
-    # p.drawString(100, y, f"Case Officer: {case_officer}     Sign: _____________     Stamp: __________")
-    
-    # # Finalize the PDF
-    # p.showPage()
-    # p.save()
-
-    # return response
-
