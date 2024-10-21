@@ -1,6 +1,6 @@
 {
-    "name": "Your App Name",
-    "short_name": "AppName",
+    "name": "Gender Management System",
+    "short_name": "G M S",
     "description": "Description of your web app",
     "start_url": "/",
     "display": "standalone",
