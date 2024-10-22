@@ -45,7 +45,8 @@ class CaseForm(forms.ModelForm):
             'police_station',  
             'investigating_officer', 
             'investigating_officer_phone', 
-            'stage_of_case',  
+            'stage_of_case',
+            'county',
             'sub_county',  # Added sub-county
             'location', 
             'ward',  
@@ -64,7 +65,8 @@ class CaseForm(forms.ModelForm):
             'investigating_officer': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter Officer Name'}),
             'investigating_officer_phone': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter Officer Phone'}),
             'stage_of_case': forms.Select(attrs={'class': 'form-control'}),  # Dropdown for stage of case
-            'sub_county': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter Sub-County'}),  # New widget for sub-county
-            'location': forms.Select(attrs={'class': 'form-control'}),  # Dropdown for locations
+            'county': forms.Select(attrs={'class': 'form-control'}),
+            'sub_county': forms.Select(attrs={'class': 'form-control'}),
+            'location': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter Location'}),  # Dropdown for locations
             'ward': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter Ward'}),  
         }

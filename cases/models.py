@@ -21,36 +21,74 @@ class Case(models.Model):
         ('indicent act', 'Incident Act'),
         ('sexual harrassment', 'Sexual Harrassment'),
     ]
-
-    LOCATION_CHOICES = [
-        ('runyu', 'Runyu'),
-        ('miritini', 'Miritini'),
-        ('birikani', 'Birikani'),
-        ('giriamani', 'Giriamani'),
-        ('nairobi area', 'Nairobi Area'),
-        ('centre', 'Centre'),
-        ('mkupe', 'Mkupe'),
-        ('kachimbeni', 'Kachimbani'),
-        ('darajani', 'Darajani'),
-        ('majengo', 'Majengo'),
-        ('kibarani', 'Kibirani'),
-        ('kwashee', 'Kwashee'),
-        ('ganahola', 'Ganahola'),
-        ('aldina', 'Aldina'),
-        ('owino huru', 'Owino Huru'),
-        ('chamunyu jomvu', 'Chamunyu Jomvu'),
-        ('staff', 'Staff'),
-        ('jomvu', 'Jomvu'),
-        ('majengo mapya', 'Majengo Mapya'),
-        ('kwa mwanzia', 'Kwa Mwanzia'),
-        ('kilifi south', 'Kilifi South'),
-        ('likoni', 'Likoni'),
-        ('kisauni', 'Kisauni'),
-        ('nyali', 'Nyali'),
-        ('changamwe', 'Changamwe'),
-        ('kwapunda', 'Kwapunda'),
-        ('bahati', 'Bahati'),
+    
+    COUNTY_CHOICES = [
+        ('mombasa', 'Mombasa'),
+        ('kwale', 'Kwale'),
+        ('kilifi', 'Kilifi'),
+        ('tana river', 'Tana River'),
+        ('lamu', 'Lamu'),
+        ('taita-taveta', 'Taita-Taveta'),
     ]
+    
+    SUB_COUNTY_CHOICES=[
+        ('changamwe', ' Changamwe'),
+        ('jomvu','Jomvu'),
+        ('kisauni','Kisauni'),
+        ('likoni','Likoni'),
+        ('mvita','Mvita'),
+        ('nyali','Nyali'),
+        ('matuga','Matuga'),
+        ('msambweni','Msambweni'),
+        ('lunga lunga','Lunga Lunga'),
+        ('kinango','Kinango'),
+        ('kilifi north','Kilifi North'),
+        ('kilifi south','Kilifi South'),
+        ('malindi','Malindi'),
+        ('magarini','Magarini'),
+        ('rabai','Rabai'),
+        ('kaloleni','Kaloleni'),
+        ('ganze','Ganze'),
+        ('gazole','Galole'),
+        ('bura','Bura'),
+        ('garsen','Garsen'),
+        ('lamu east','Lamu East'),
+        ('lamu west','Lamu West'),
+        ('mwatate','Mwatate'),
+        ('voi','Voi'),
+        ('taveta','Taveta'),
+        ('wundanyi','Wundanyi'),
+    ]
+
+    # LOCATION_CHOICES = [
+    #     ('runyu', 'Runyu'),
+    #     ('miritini', 'Miritini'),
+    #     ('birikani', 'Birikani'),
+    #     ('giriamani', 'Giriamani'),
+    #     ('nairobi area', 'Nairobi Area'),
+    #     ('centre', 'Centre'),
+    #     ('mkupe', 'Mkupe'),
+    #     ('kachimbeni', 'Kachimbani'),
+    #     ('darajani', 'Darajani'),
+    #     ('majengo', 'Majengo'),
+    #     ('kibarani', 'Kibirani'),
+    #     ('kwashee', 'Kwashee'),
+    #     ('ganahola', 'Ganahola'),
+    #     ('aldina', 'Aldina'),
+    #     ('owino huru', 'Owino Huru'),
+    #     ('chamunyu jomvu', 'Chamunyu Jomvu'),
+    #     ('staff', 'Staff'),
+    #     ('jomvu', 'Jomvu'),
+    #     ('majengo mapya', 'Majengo Mapya'),
+    #     ('kwa mwanzia', 'Kwa Mwanzia'),
+    #     ('kilifi south', 'Kilifi South'),
+    #     ('likoni', 'Likoni'),
+    #     ('kisauni', 'Kisauni'),
+    #     ('nyali', 'Nyali'),
+    #     ('changamwe', 'Changamwe'),
+    #     ('kwapunda', 'Kwapunda'),
+    #     ('bahati', 'Bahati'),
+    # ]
 
     STAGE_OF_CASE_CHOICES = [
         ('defence hearing', 'Defence Hearing'),
@@ -77,8 +115,9 @@ class Case(models.Model):
     investigating_officer = models.CharField(max_length=255)
     investigating_officer_phone = models.CharField(max_length=15)
     stage_of_case = models.CharField(max_length=100, choices=STAGE_OF_CASE_CHOICES)
-    sub_county = models.CharField(max_length=255, blank=True, null=True)  # Added Sub-County field
-    location = models.CharField(max_length=255, choices=LOCATION_CHOICES, blank=True, null=True)
+    county= models.CharField(max_length=255, choices=COUNTY_CHOICES, blank=True, null=True)
+    sub_county = models.CharField(max_length=255, choices=SUB_COUNTY_CHOICES, blank=True, null=True)  # Added Sub-County field
+    location = models.CharField(max_length=255, null=True)
 
     ward = models.CharField(max_length=255, null=True)
 
