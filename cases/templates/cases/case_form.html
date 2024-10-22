@@ -1,5 +1,4 @@
 {% extends 'base.html' %}
-
 {% load crispy_forms_tags %}
 
 {% block content %}
@@ -8,8 +7,53 @@
     <form method="POST" class="form-horizontal">
         {% csrf_token %}
         {{ form|crispy }}
+
+        <div class="form-group">
+            <label for="id_county">County:</label>
+            <select id="id_county" name="county" class="form-control">
+                <option value="">Select a county</option>
+                {% for key, value in form.fields.county.choices %}
+                    <option value="{{ key }}">{{ value }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="id_sub_county">Sub-County:</label>
+            <select id="id_sub_county" name="sub_county" class="form-control">
+                <option value="">Select a sub-county</option>
+            </select>
+        </div>
+
         <button type="submit" class="btn btn-success mt-3">Save Case</button>
     </form>
 </div>
-{% endblock %}
 
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    const subCountyData = {
+        'mombasa': ['Changamwe', 'Jomvu', 'Kisauni', 'Likoni', 'Mvita', 'Nyali'],
+        'kwale': ['Matuga', 'Msambweni', 'Lunga Lunga', 'Kinango'],
+        'kilifi': ['Kilifi North', 'Kilifi South', 'Malindi', 'Magarini', 'Rabai', 'Kaloleni', 'Ganze'],
+        'tana river': ['Bura', 'Galole', 'Garsen'],
+        'lamu': ['Lamu East', 'Lamu West'],
+        'taita-taveta': ['Mwatate', 'Voi', 'Taveta', 'Wundanyi']
+    };
+
+    $('#id_county').change(function () {
+        const county = $(this).val();
+        const subCountySelect = $('#id_sub_county');
+        subCountySelect.empty(); // Clear current options
+        subCountySelect.append('<option value="">Select a sub-county</option>'); // Add default option
+
+        if (county) {
+            const subCounties = subCountyData[county];
+            if (subCounties) {
+                subCounties.forEach(function (subCounty) {
+                    subCountySelect.append('<option value="' + subCounty.toLowerCase().replace(' ', '_') + '">' + subCounty + '</option>');
+                });
+            }
+        }
+    });
+</script>
+{% endblock %}
