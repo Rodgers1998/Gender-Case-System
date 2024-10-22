@@ -28,15 +28,13 @@ def custom_logout(request):
 def home(request):
     query = request.GET.get('q')
 
-    # Filter for upcoming cases based on the next_court_date
+    # Fetch upcoming cases for general display (Top 10 overall)
     if request.user.is_superuser:
-        # Admin (superuser) can view all upcoming cases
-        upcoming_cases = Case.objects.filter(next_court_date__gte=date.today()).order_by('next_court_date')
+        upcoming_cases = Case.objects.filter(next_court_date__gte=date.today()).order_by('next_court_date')[:10]
     else:
-        # Normal user can only see their own upcoming cases
-        upcoming_cases = Case.objects.filter(user=request.user, next_court_date__gte=date.today()).order_by('next_court_date')
+        upcoming_cases = Case.objects.filter(user=request.user, next_court_date__gte=date.today()).order_by('next_court_date')[:10]
 
-    # If a search query is provided, filter the upcoming cases based on it
+    # If search query is provided, filter upcoming cases
     if query:
         upcoming_cases = upcoming_cases.filter(
             Q(case_number__icontains=query) |
@@ -47,17 +45,21 @@ def home(request):
             Q(investigating_officer__icontains=query) |
             Q(investigating_officer_phone__icontains=query) |
             Q(location__icontains=query) |
-            Q(court_name__icontains=query) |  # Added field for Court Name
-            Q(stage_of_case__icontains=query) |  # Added field for Stage of Case
-            Q(ward__icontains=query) |  # Added field for Ward
-            Q(police_station__icontains=query)  # Added field for Police Station
+            Q(court_name__icontains=query) |
+            Q(stage_of_case__icontains=query) |
+            Q(ward__icontains=query) |
+            Q(police_station__icontains=query)
         )
 
-    # Limit to the top 10 upcoming cases after filtering
-    upcoming_cases = upcoming_cases[:10]  # Change from 5 to 10
+    # Fetch top 5 upcoming cases for each stage of case
+    stage_cases = {}
+    stage_names = dict(Case.STAGE_OF_CASE_CHOICES)
 
-    # Render the home template with the filtered upcoming cases
-    return render(request, 'cases/home.html', {'upcoming_cases': upcoming_cases})
+    for stage_value, stage_label in Case.STAGE_OF_CASE_CHOICES:
+        stage_cases[stage_label] = Case.objects.filter(stage_of_case=stage_value, next_court_date__gte=date.today()).order_by('next_court_date')[:5]
+
+    return render(request, 'cases/home.html', {'upcoming_cases': upcoming_cases, 'stage_cases': stage_cases})
+
 
 
 @login_required
