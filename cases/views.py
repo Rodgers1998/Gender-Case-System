@@ -153,6 +153,7 @@ from reportlab.lib.units import inch
 from reportlab.platypus import Table, TableStyle
 from .models import Case  # Adjust based on your model's location
 
+
 def generate_case_pdf(request, case_id):
     case = Case.objects.get(pk=case_id)
     case_officer = request.user.username
@@ -166,55 +167,54 @@ def generate_case_pdf(request, case_id):
     # Add logo (if available)
     logo_path = os.path.join(settings.STATIC_ROOT, 'images/shofco.png')
     if os.path.exists(logo_path):
-        p.drawImage(logo_path, 100, height - 100, width=2*inch, height=0.75*inch)
+        p.drawImage(logo_path, 100, height - 100, width=2 * inch, height=0.75 * inch)
 
+    # Title
     p.setFont("Helvetica-Bold", 18)
     p.drawString(100, height - 150, "Case Detail")
 
-    # Case details table with added county and sub-county
-    case_details = [
-        ["Case Number:", case.case_number],
-        ["Court File Number:", case.court_file_number],
-        ["Case Type:", case.case_type],
-        ["Accused Name:", case.accused_name],
-        ["Accuser Name:", case.accuser_name],
-        ["Accuser Phone:", case.accuser_phone],
-        ["Court Name:", case.court_name],
-        ["Court Date:", str(case.court_date)],
-        ["Next Court Date:", str(case.next_court_date)],
-        ["Police Station:", case.police_station],
-        ["Investigating Officer:", case.investigating_officer],
-        ["Investigating Officer Phone No:", case.investigating_officer_phone],
-        ["Stage of Case:", case.get_stage_of_case_display()],
-        ["Location:", case.location],
-        ["Ward:", case.ward],
-        ["County:", case.county],              # Added county
-        ["Sub-County:", case.sub_county],      # Added sub-county
-    ]
-
-    table = Table(case_details, colWidths=[2.5 * inch, 4 * inch])
-    table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), colors.lightgrey),
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.black),
-        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
-        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, -1), 12),
-        ('BOTTOMPADDING', (0, 0), (-1, 0), 10),
-        ('BACKGROUND', (0, 1), (-1, -1), colors.whitesmoke),
-        ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
-    ]))
-
-    table.wrapOn(p, width, height)
-    table.drawOn(p, 100, height - 400)
-
+    # Case Details Formatting
     p.setFont("Helvetica", 12)
-    p.drawString(100, height - 430, f"Case Officer: {case_officer}")
-    p.drawString(300, height - 430, "Sign: ______________________")
-    p.drawString(300, height - 500, "Stamp: ")
+    line_height = 14  # Adjust spacing between lines
+    y_position = height - 180  # Initial y-position for content
 
+    # Helper function to draw label and value like in case_detail.html
+    def draw_detail(label, value):
+        nonlocal y_position
+        p.setFont("Helvetica-Bold", 12)
+        p.drawString(100, y_position, f"{label}:")
+        p.setFont("Helvetica", 12)
+        p.drawString(250, y_position, str(value) if value else "N/A")  # Handles None values gracefully
+        y_position -= line_height
+
+    # Render each case detail
+    draw_detail("Case Number", case.case_number)
+    draw_detail("Court File Number", case.court_file_number)
+    draw_detail("Case Type", case.case_type)
+    draw_detail("Accused Name", case.accused_name)
+    draw_detail("Accuser Name", case.accuser_name)
+    draw_detail("Accuser Phone", case.accuser_phone)
+    draw_detail("Court Name", case.court_name)
+    draw_detail("Court Date", case.court_date)
+    draw_detail("Next Court Date", case.next_court_date)
+    draw_detail("Police Station", case.police_station)
+    draw_detail("Investigating Officer", case.investigating_officer)
+    draw_detail("Investigating Officer Phone No", case.investigating_officer_phone)
+    draw_detail("Stage of Case", case.get_stage_of_case_display())
+    draw_detail("Location", case.location)
+    draw_detail("Ward", case.ward)
+    draw_detail("County", case.county)
+    draw_detail("Sub-County", case.sub_county)
+
+    # Case Officer and Signatures
+    y_position -= 30  # Add space before signatures
+    p.drawString(100, y_position, f"Case Officer: {case_officer}")
+    p.drawString(300, y_position, "Sign: ______________________")
+    y_position -= 70  # Adjust space for Stamp
+    p.drawString(300, y_position, "Stamp: ")
+
+    # Finalize PDF
     p.showPage()
     p.save()
 
     return response
-
-
