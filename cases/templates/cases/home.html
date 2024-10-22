@@ -18,7 +18,7 @@
 
         <!-- Upcoming Cases displayed on the right -->
         <div class="upcoming-cases mt-4">
-            <h2>Top 5 Upcoming Cases</h2>
+            <h2>Top 10 Upcoming Cases</h2> <!-- Changed from Top 5 to Top 10 -->
 
             <!-- Search bar for upcoming cases -->
             <form method="GET" action="{% url 'home' %}" class="form-inline mb-4">
@@ -30,16 +30,15 @@
                 <thead>
                     <tr>
                         <th>Case Number</th>
-                        <th>Next Court Date</th>  <!-- Updated header -->
+                        <th>Next Court Date</th>  
                         <th>Details</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for case in upcoming_cases %}
-                    <!-- No filter by user here as superuser should see all cases -->
                     <tr>
                         <td>{{ case.case_number }}</td>
-                        <td>{{ case.next_court_date }}</td>  <!-- Updated field -->
+                        <td>{{ case.next_court_date }}</td>  
                         <td><a href="{% url 'case_detail' case.pk %}" class="btn btn-info btn-sm">View Details</a></td>
                     </tr>
                     {% empty %}

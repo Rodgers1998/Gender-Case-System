@@ -53,11 +53,12 @@ def home(request):
             Q(police_station__icontains=query)  # Added field for Police Station
         )
 
-    # Limit to the top 5 upcoming cases after filtering
-    upcoming_cases = upcoming_cases[:5]
+    # Limit to the top 10 upcoming cases after filtering
+    upcoming_cases = upcoming_cases[:10]  # Change from 5 to 10
 
     # Render the home template with the filtered upcoming cases
     return render(request, 'cases/home.html', {'upcoming_cases': upcoming_cases})
+
 
 @login_required
 def case_list(request):
