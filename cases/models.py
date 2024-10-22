@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+
 class Case(models.Model):
     CASE_TYPE_CHOICES = [
         ('abduction', 'Abduction'),
@@ -59,36 +60,6 @@ class Case(models.Model):
         ('taveta','Taveta'),
         ('wundanyi','Wundanyi'),
     ]
-
-    # LOCATION_CHOICES = [
-    #     ('runyu', 'Runyu'),
-    #     ('miritini', 'Miritini'),
-    #     ('birikani', 'Birikani'),
-    #     ('giriamani', 'Giriamani'),
-    #     ('nairobi area', 'Nairobi Area'),
-    #     ('centre', 'Centre'),
-    #     ('mkupe', 'Mkupe'),
-    #     ('kachimbeni', 'Kachimbani'),
-    #     ('darajani', 'Darajani'),
-    #     ('majengo', 'Majengo'),
-    #     ('kibarani', 'Kibirani'),
-    #     ('kwashee', 'Kwashee'),
-    #     ('ganahola', 'Ganahola'),
-    #     ('aldina', 'Aldina'),
-    #     ('owino huru', 'Owino Huru'),
-    #     ('chamunyu jomvu', 'Chamunyu Jomvu'),
-    #     ('staff', 'Staff'),
-    #     ('jomvu', 'Jomvu'),
-    #     ('majengo mapya', 'Majengo Mapya'),
-    #     ('kwa mwanzia', 'Kwa Mwanzia'),
-    #     ('kilifi south', 'Kilifi South'),
-    #     ('likoni', 'Likoni'),
-    #     ('kisauni', 'Kisauni'),
-    #     ('nyali', 'Nyali'),
-    #     ('changamwe', 'Changamwe'),
-    #     ('kwapunda', 'Kwapunda'),
-    #     ('bahati', 'Bahati'),
-    # ]
 
     STAGE_OF_CASE_CHOICES = [
         ('defence hearing', 'Defence Hearing'),
