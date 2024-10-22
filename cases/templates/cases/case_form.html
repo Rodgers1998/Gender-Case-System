@@ -8,7 +8,7 @@
         {% csrf_token %}
         {{ form|crispy }}
 
-        <div class="form-group">
+        {% comment %} <div class="form-group">
             <label for="id_county">County:</label>
             <select id="id_county" name="county" class="form-control">
                 <option value="">Select a county</option>
@@ -23,7 +23,7 @@
             <select id="id_sub_county" name="sub_county" class="form-control">
                 <option value="">Select a sub-county</option>
             </select>
-        </div>
+        </div> {% endcomment %}
 
         <button type="submit" class="btn btn-success mt-3">Save Case</button>
     </form>
