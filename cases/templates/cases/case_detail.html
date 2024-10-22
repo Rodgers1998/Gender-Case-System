@@ -46,7 +46,10 @@
                 <dt class="col-sm-4">Stage of Case:</dt>
                 <dd class="col-sm-8">{{ case.get_stage_of_case_display }}</dd>
 
-                <dt class="col-sm-4">Sub-County:</dt>
+                <dt class="col-sm-4">County:</dt>  <!-- Added County field -->
+                <dd class="col-sm-8">{{ case.county }}</dd>
+
+                <dt class="col-sm-4">Sub-County:</dt>  <!-- Already present Sub-County field -->
                 <dd class="col-sm-8">{{ case.sub_county }}</dd>
 
                 <dt class="col-sm-4">Location:</dt>
@@ -54,14 +57,13 @@
 
                 <dt class="col-sm-4">Ward:</dt>
                 <dd class="col-sm-8">{{ case.ward }}</dd>
-                
             </dl>
 
             <div class="mt-4">
                 <a href="{% url 'case_update' case.pk %}" class="btn btn-warning btn-lg">Edit Case</a>
                 <a href="{% url 'case_delete' case.pk %}" class="btn btn-danger btn-lg">Delete Case</a>
                 <a href="{% url 'case_list' %}" class="btn btn-secondary btn-lg">Back to List</a>
-                <a href="{% url 'case_pdf' case.pk %}" class="btn btn-primary btn-lg">Download PDF</a> <!-- Added Download Button -->
+                <a href="{% url 'case_pdf' case.pk %}" class="btn btn-primary btn-lg">Download PDF</a>
             </div>
         </div>
     </div>
