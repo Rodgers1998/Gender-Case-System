@@ -199,7 +199,7 @@ def generate_case_pdf(request, case_id):
     draw_detail("Next Court Date", case.next_court_date)
     draw_detail("Police Station", case.police_station)
     draw_detail("Investigating Officer", case.investigating_officer)
-    draw_detail("Investigating Officer Phone No", case.investigating_officer_phone)
+    draw_detail("IO Phone No", case.investigating_officer_phone)
     draw_detail("Stage of Case", case.get_stage_of_case_display())
     draw_detail("Location", case.location)
     draw_detail("Ward", case.ward)
