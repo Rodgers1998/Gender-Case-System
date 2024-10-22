@@ -201,10 +201,11 @@ def generate_case_pdf(request, case_id):
     draw_detail("Investigating Officer", case.investigating_officer)
     draw_detail("IO Phone No", case.investigating_officer_phone)
     draw_detail("Stage of Case", case.get_stage_of_case_display())
-    draw_detail("Location", case.location)
-    draw_detail("Ward", case.ward)
     draw_detail("County", case.county)
     draw_detail("Sub-County", case.sub_county)
+    draw_detail("Location", case.location)
+    draw_detail("Ward", case.ward)
+    
 
     # Case Officer and Signatures
     y_position -= 30  # Add space before signatures
