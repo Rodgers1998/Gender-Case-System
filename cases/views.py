@@ -28,13 +28,15 @@ def custom_logout(request):
 def home(request):
     query = request.GET.get('q')
 
-    # Fetch upcoming cases for general display (Top 10 overall)
+    # Filter for upcoming cases based on the next_court_date
     if request.user.is_superuser:
-        upcoming_cases = Case.objects.filter(next_court_date__gte=date.today()).order_by('next_court_date')[:10]
+        # Admin (superuser) can view all upcoming cases
+        upcoming_cases = Case.objects.filter(next_court_date__gte=date.today()).order_by('next_court_date')
     else:
-        upcoming_cases = Case.objects.filter(user=request.user, next_court_date__gte=date.today()).order_by('next_court_date')[:10]
+        # Normal user can only see their own upcoming cases
+        upcoming_cases = Case.objects.filter(user=request.user, next_court_date__gte=date.today()).order_by('next_court_date')
 
-    # If search query is provided, filter upcoming cases
+    # If a search query is provided, filter the upcoming cases based on it
     if query:
         upcoming_cases = upcoming_cases.filter(
             Q(case_number__icontains=query) |
@@ -48,18 +50,17 @@ def home(request):
             Q(court_name__icontains=query) |
             Q(stage_of_case__icontains=query) |
             Q(ward__icontains=query) |
-            Q(police_station__icontains=query)
+            Q(police_station__icontains=query) |
+            Q(county__icontains=query) |          # Added county
+            Q(sub_county__icontains=query)        # Added sub-county
         )
 
-    # Fetch top 5 upcoming cases for each stage of case
-    stage_cases = {}
-    stage_names = dict(Case.STAGE_OF_CASE_CHOICES)
 
-    for stage_value, stage_label in Case.STAGE_OF_CASE_CHOICES:
-        stage_cases[stage_label] = Case.objects.filter(stage_of_case=stage_value, next_court_date__gte=date.today()).order_by('next_court_date')[:5]
+    # Limit to the top 10 upcoming cases after filtering
+    upcoming_cases = upcoming_cases[:10]  # Change from 5 to 10
 
-    return render(request, 'cases/home.html', {'upcoming_cases': upcoming_cases, 'stage_cases': stage_cases})
-
+    # Render the home template with the filtered upcoming cases
+    return render(request, 'cases/home.html', {'upcoming_cases': upcoming_cases})
 
 
 @login_required
@@ -87,10 +88,12 @@ def case_list(request):
             Q(investigating_officer__icontains=query) |
             Q(investigating_officer_phone__icontains=query) |
             Q(location__icontains=query) |
-            Q(court_name__icontains=query) |  # Added field for Court Name
-            Q(stage_of_case__icontains=query) |  # Added field for Stage of Case
-            Q(ward__icontains=query) |  # Added field for Ward
-            Q(police_station__icontains=query)  # Added field for Police Station
+            Q(court_name__icontains=query) |
+            Q(stage_of_case__icontains=query) |
+            Q(ward__icontains=query) |
+            Q(police_station__icontains=query) |
+            Q(county__icontains=query) |          # Added county
+            Q(sub_county__icontains=query)        # Added sub-county
         )
 
     # Pagination - Show 10 cases per page
@@ -151,30 +154,24 @@ from reportlab.platypus import Table, TableStyle
 from .models import Case  # Adjust based on your model's location
 
 def generate_case_pdf(request, case_id):
-    # Retrieve case details from the database
     case = Case.objects.get(pk=case_id)
+    case_officer = request.user.username
 
-    # Get the logged-in user (case officer)
-    case_officer = request.user.username  # Get the username of the logged-in user
-    
-    # Create a response with the PDF
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = f'attachment; filename="case_{case_id}.pdf"'
 
-    # Create the PDF
     p = canvas.Canvas(response, pagesize=letter)
     width, height = letter
 
-    # Add SHOFCO Logo
-    logo_path = os.path.join(settings.STATIC_ROOT, 'images/shofco.png')  # Adjust the path based on your structure
+    # Add logo (if available)
+    logo_path = os.path.join(settings.STATIC_ROOT, 'images/shofco.png')
     if os.path.exists(logo_path):
-        p.drawImage(logo_path, 100, height - 100, width=2*inch, height=0.75*inch)  # Adjust the position and size
+        p.drawImage(logo_path, 100, height - 100, width=2*inch, height=0.75*inch)
 
-    # Set the title
     p.setFont("Helvetica-Bold", 18)
     p.drawString(100, height - 150, "Case Detail")
 
-    # Set up the table for displaying case details in a structured format
+    # Case details table with added county and sub-county
     case_details = [
         ["Case Number:", case.case_number],
         ["Court File Number:", case.court_file_number],
@@ -191,37 +188,33 @@ def generate_case_pdf(request, case_id):
         ["Stage of Case:", case.get_stage_of_case_display()],
         ["Location:", case.location],
         ["Ward:", case.ward],
+        ["County:", case.county],              # Added county
+        ["Sub-County:", case.sub_county],      # Added sub-county
     ]
 
-    # Convert the case details into a table format
-    table = Table(case_details, colWidths=[2.5 * inch, 4 * inch])  # Adjust column widths
-
-    # Add styling to the table
+    table = Table(case_details, colWidths=[2.5 * inch, 4 * inch])
     table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), colors.lightgrey),  # Header background
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.black),  # Header text color
-        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),  # Align text to the left
-        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),  # Font for header
-        ('FONTSIZE', (0, 0), (-1, -1), 12),  # Font size
-        ('BOTTOMPADDING', (0, 0), (-1, 0), 10),  # Padding below header
-        ('BACKGROUND', (0, 1), (-1, -1), colors.whitesmoke),  # Alternate row background
-        ('GRID', (0, 0), (-1, -1), 0.5, colors.black),  # Grid lines
+        ('BACKGROUND', (0, 0), (-1, 0), colors.lightgrey),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.black),
+        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, -1), 12),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 10),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.whitesmoke),
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
     ]))
 
-    # Draw the table on the PDF
     table.wrapOn(p, width, height)
-    table.drawOn(p, 100, height - 400)  # Adjust the position of the table
+    table.drawOn(p, 100, height - 400)
 
-    # Add case officer information
     p.setFont("Helvetica", 12)
     p.drawString(100, height - 430, f"Case Officer: {case_officer}")
     p.drawString(300, height - 430, "Sign: ______________________")
-   
     p.drawString(300, height - 500, "Stamp: ")
 
-    # Finalize the PDF
     p.showPage()
     p.save()
 
     return response
+
 
