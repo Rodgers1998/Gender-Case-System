@@ -82,9 +82,28 @@ def case_list(request):
         # Normal user can only see their own cases, including past court dates
         all_cases = Case.objects.filter(user=request.user).order_by('next_court_date')
 
-    # If a search query is provided, filter based on it
+@login_required
+def case_list(request):
+    query = request.GET.get('q')
+    filter_option = request.GET.get('filter')  # Get filter option from URL
+
+    # Initialize the variable to an empty queryset to avoid UnboundLocalError
+    all_cases = Case.objects.none()
+
+    if filter_option == "today":
+        # Filter cases that have been created today
+        all_cases = Case.objects.filter(court_date=date.today()).order_by('next_court_date')
+    else:
+        if request.user.is_superuser:
+            # Admin (superuser) can view all cases
+            all_cases = Case.objects.all().order_by('next_court_date')
+        else:
+            # Normal user can only see their own cases
+            all_cases = Case.objects.filter(user=request.user).order_by('next_court_date')
+
+    # If a search query is provided, filter the cases based on it
     if query:
-        all_cases = all_cases.filter(
+        upcoming_cases = upcoming_cases.filter(
             Q(case_number__icontains=query) |
             Q(case_type__icontains=query) |
             Q(accused_name__icontains=query) |
@@ -106,8 +125,8 @@ def case_list(request):
     page_number = request.GET.get('page')
     cases = paginator.get_page(page_number)
 
-    # Render the case list template with all cases
     return render(request, 'cases/case_list.html', {'cases': cases})
+
 
 
 
