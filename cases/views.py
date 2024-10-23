@@ -14,6 +14,7 @@ from django.db.models import Count
 from .models import Case
 
 
+
 def register(request):
     if request.method == 'POST':
         form = UserRegistrationForm(request.POST)
@@ -160,6 +161,26 @@ def case_analysis(request):
         'county_data': county_data,
         'subcounty_data': subcounty_data,
     })
+
+
+
+@login_required
+def upcoming_cases_by_county(request):
+    # Define the counties to filter by
+    counties = ['Mombasa', 'Kwale', 'Kilifi', 'Tana River', 'Lamu', 'Taita-Taveta']
+
+    # Dictionary to store the top 5 cases for each county
+    cases_by_county = {}
+
+    # Fetch top 5 upcoming cases per county
+    for county in counties:
+        cases = Case.objects.filter(
+            county__iexact=county,
+            next_court_date__gte=date.today()
+        ).order_by('next_court_date')[:5]  # Top 5 upcoming cases per county
+        cases_by_county[county] = cases
+
+    return render(request, 'cases/upcoming_cases_by_county.html', {'cases_by_county': cases_by_county})
 
 
 

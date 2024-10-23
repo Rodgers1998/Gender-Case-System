@@ -13,7 +13,7 @@
             <!-- Other Important Buttons -->
             <a href="{% url 'case_list' %}" class="btn btn-secondary" data-short="V"><i class="bi bi-view-list"></i><br>View All Cases</a>
             <a href="{% url 'case_list' %}?filter=today" class="btn btn-info" data-short="T"><i class="bi bi-calendar-date-fill"></i><br>Today's Cases</a>
-            <a href="{% url 'case_list' %}?filter=upcoming" class="btn btn-warning" data-short="U"><i class="bi bi-calendar-month-fill"></i><br>Upcoming Cases</a>
+            <a href="{% url 'upcoming_cases_by_county' %}" class="btn btn-warning" data-short="U"><i class="bi bi-calendar-month-fill"></i><br>Upcoming Cases</a>
             <!-- Case Analysis Button -->
             <a href="{% url 'case_analysis' %}" class="btn btn-success" data-short="C"><i class="bi bi-bar-chart"></i><br>Case Analysis</a>
 

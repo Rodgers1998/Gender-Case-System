@@ -5,6 +5,7 @@ from .views import custom_logout
 
 from .views import generate_case_pdf
 from .views import case_analysis
+from .views import upcoming_cases_by_county
 
 urlpatterns = [
     path('', views.home, name='home'),  # Home page
@@ -20,5 +21,6 @@ urlpatterns = [
     
     path('case/<int:case_id>/pdf/', generate_case_pdf, name='case_pdf'),
     path('case_analysis/', case_analysis, name='case_analysis'),
+    path('cases/upcoming/', upcoming_cases_by_county, name='upcoming_cases_by_county'),
     
 ]
