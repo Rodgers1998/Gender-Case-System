@@ -90,9 +90,10 @@ class Case(models.Model):
     county= models.CharField(max_length=255, choices=COUNTY_CHOICES, blank=True, null=True)
     sub_county = models.CharField(max_length=255, choices=SUB_COUNTY_CHOICES, blank=True, null=True)  # Added Sub-County field
     location = models.CharField(max_length=255, null=True)
-
     ward = models.CharField(max_length=255, null=True)
+    
     created_at = models.DateTimeField(auto_now_add=True)  # Automatically set the creation time when the case is added
+    
 
 
     def __str__(self):
