@@ -15,20 +15,45 @@
         </select>
     </div>
 
+    <!-- Main chart for counties -->
     <canvas id="county-chart" width="400" height="200"></canvas>
+
+    <!-- Chart for sub-counties, hidden by default -->
     <canvas id="subcounty-chart" width="400" height="200" style="display:none;"></canvas>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+    // Create a color palette for the charts
+    const vibrantColors = [
+        'rgba(54, 162, 235, 0.6)',
+        'rgba(255, 99, 132, 0.6)',
+        'rgba(255, 206, 86, 0.6)',
+        'rgba(75, 192, 192, 0.6)',
+        'rgba(153, 102, 255, 0.6)',
+        'rgba(255, 159, 64, 0.6)'
+    ];
+
+    const vibrantBorderColors = [
+        'rgba(54, 162, 235, 1)',
+        'rgba(255, 99, 132, 1)',
+        'rgba(255, 206, 86, 1)',
+        'rgba(75, 192, 192, 1)',
+        'rgba(153, 102, 255, 1)',
+        'rgba(255, 159, 64, 1)'
+    ];
+
+    // County chart configuration with 3D-like colors
     var countyData = {
         labels: [{% for county in county_data %}"{{ county.county }}", {% endfor %}],
         datasets: [{
             label: 'Number of Cases',
             data: [{% for county in county_data %}{{ county.total }}, {% endfor %}],
-            backgroundColor: 'rgba(54, 162, 235, 0.6)',
-            borderColor: 'rgba(54, 162, 235, 1)',
-            borderWidth: 1
+            backgroundColor: vibrantColors,
+            borderColor: vibrantBorderColors,
+            borderWidth: 2,
+            hoverBackgroundColor: 'rgba(0, 0, 0, 0.8)',  // Darker color on hover
+            hoverBorderColor: 'rgba(0, 0, 0, 1)'  // Darker border on hover
         }]
     };
 
@@ -37,15 +62,30 @@
         type: 'bar',
         data: countyData,
         options: {
+            plugins: {
+                legend: {
+                    labels: {
+                        color: 'black'  // Legend color
+                    }
+                }
+            },
             scales: {
+                x: {
+                    ticks: {
+                        color: 'black',  // X-axis labels
+                    }
+                },
                 y: {
-                    beginAtZero: true
+                    ticks: {
+                        color: 'black',  // Y-axis labels
+                        beginAtZero: true  // Start Y-axis at 0
+                    }
                 }
             }
         }
     });
 
-    // Subcounty chart generation
+    // Subcounty chart configuration
     document.getElementById('county-select').addEventListener('change', function() {
         var selectedCounty = this.value;
         var subCountyData = {
@@ -53,12 +93,15 @@
             datasets: [{
                 label: 'Cases by Type',
                 data: [],
-                backgroundColor: 'rgba(75, 192, 192, 0.6)',
-                borderColor: 'rgba(75, 192, 192, 1)',
-                borderWidth: 1
+                backgroundColor: vibrantColors,
+                borderColor: vibrantBorderColors,
+                borderWidth: 2,
+                hoverBackgroundColor: 'rgba(0, 0, 0, 0.8)',  // Darker color on hover
+                hoverBorderColor: 'rgba(0, 0, 0, 1)'  // Darker border on hover
             }]
         };
 
+        // Loop through the subcounty data and display relevant data for the selected county
         {% for subcounty in subcounty_data %}
             if ("{{ subcounty.county }}" === selectedCounty) {
                 subCountyData.labels.push("{{ subcounty.sub_county }} ({{ subcounty.case_type }})");
@@ -66,17 +109,33 @@
             }
         {% endfor %}
 
+        // Show or hide the sub-county chart based on data availability
         if (subCountyData.labels.length > 0) {
             var ctxSubcounty = document.getElementById('subcounty-chart').getContext('2d');
             document.getElementById('subcounty-chart').style.display = 'block';
-            
+
             new Chart(ctxSubcounty, {
                 type: 'bar',
                 data: subCountyData,
                 options: {
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: 'black'  // Legend color
+                            }
+                        }
+                    },
                     scales: {
+                        x: {
+                            ticks: {
+                                color: 'black'  // X-axis labels
+                            }
+                        },
                         y: {
-                            beginAtZero: true
+                            ticks: {
+                                color: 'black',  // Y-axis labels
+                                beginAtZero: true
+                            }
                         }
                     }
                 }
