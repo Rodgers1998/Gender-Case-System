@@ -11,7 +11,8 @@
         {% for county, cases in cases_by_county.items %}
         <div class="col-md-6 mb-4">
             <table class="table table-striped">
-                <thead style="background-color: {{ forloop.counter0|mod:6|header_colors }};">
+                <!-- Use the cycle tag to alternate colors -->
+                <thead style="background-color: {% cycle '#007bff' '#28a745' '#ffc107' '#17a2b8' '#fd7e14' '#6f42c1' %};">
                     <tr>
                         <th colspan="3">{{ county }} - Top 5 Upcoming Cases</th>
                     </tr>
@@ -45,32 +46,9 @@
     </div>
 </div>
 
-<!-- Custom styles for header colors -->
 <style>
     .table th {
         color: white;
     }
 </style>
-
-<script>
-    // Define color options for table headers (you can add more or adjust)
-    const headerColors = [
-        '#007bff',  // Blue
-        '#28a745',  // Green
-        '#ffc107',  // Yellow
-        '#17a2b8',  // Teal
-        '#fd7e14',  // Orange
-        '#6f42c1'   // Purple
-    ];
-
-    // Function to set the header color based on index
-    function getColor(index) {
-        return headerColors[index % headerColors.length];
-    }
-
-    // Apply colors to headers
-    document.querySelectorAll('thead').forEach((thead, index) => {
-        thead.style.backgroundColor = getColor(index);
-    });
-</script>
 {% endblock %}
