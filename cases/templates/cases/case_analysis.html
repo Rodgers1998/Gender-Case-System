@@ -16,7 +16,6 @@
     </div>
 
     <canvas id="county-chart" width="400" height="200"></canvas>
-
     <canvas id="subcounty-chart" width="400" height="200" style="display:none;"></canvas>
 </div>
 
@@ -46,28 +45,34 @@
         }
     });
 
+    // Subcounty chart generation
     document.getElementById('county-select').addEventListener('change', function() {
-        var county = this.value;
+        var selectedCounty = this.value;
+        var subCountyData = {
+            labels: [],
+            datasets: [{
+                label: 'Cases by Type',
+                data: [],
+                backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+            }]
+        };
 
-        if (county) {
-            // Filter data for the selected county
-            var subcountyData = {
-                labels: [{% for subcounty in subcounty_data if subcounty.county == county %}"{{ subcounty.sub_county }}", {% endfor %}],
-                datasets: [{
-                    label: 'Cases by Type',
-                    data: [{% for subcounty in subcounty_data if subcounty.county == county %}{{ subcounty.total }}, {% endfor %}],
-                    backgroundColor: 'rgba(75, 192, 192, 0.6)',
-                    borderColor: 'rgba(75, 192, 192, 1)',
-                    borderWidth: 1
-                }]
-            };
+        {% for subcounty in subcounty_data %}
+            if ("{{ subcounty.county }}" === selectedCounty) {
+                subCountyData.labels.push("{{ subcounty.sub_county }} ({{ subcounty.case_type }})");
+                subCountyData.datasets[0].data.push({{ subcounty.total }});
+            }
+        {% endfor %}
 
+        if (subCountyData.labels.length > 0) {
             var ctxSubcounty = document.getElementById('subcounty-chart').getContext('2d');
             document.getElementById('subcounty-chart').style.display = 'block';
             
             new Chart(ctxSubcounty, {
                 type: 'bar',
-                data: subcountyData,
+                data: subCountyData,
                 options: {
                     scales: {
                         y: {
@@ -77,7 +82,6 @@
                 }
             });
         } else {
-            // Reset if no county selected
             document.getElementById('subcounty-chart').style.display = 'none';
         }
     });

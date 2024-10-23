@@ -152,13 +152,15 @@ def case_analysis(request):
     # Get case counts by county
     county_data = Case.objects.values('county').annotate(total=Count('id')).order_by('-total')
 
-    # Get case counts by sub-county and case type (for when county is selected)
-    subcounty_data = Case.objects.values('sub_county', 'case_type').annotate(total=Count('id')).order_by('-total')
+    # Get case counts by sub-county and case type
+    subcounty_data = Case.objects.values('county', 'sub_county', 'case_type').annotate(total=Count('id')).order_by('county', 'sub_county')
 
+    # Pass the data to the template
     return render(request, 'cases/case_analysis.html', {
         'county_data': county_data,
-        'subcounty_data': subcounty_data
+        'subcounty_data': subcounty_data,
     })
+
 
 
 
