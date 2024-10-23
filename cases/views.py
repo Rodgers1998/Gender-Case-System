@@ -9,6 +9,10 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.http import HttpResponse
 
+from django.shortcuts import render
+from django.db.models import Count
+from .models import Case
+
 
 def register(request):
     if request.method == 'POST':
@@ -140,6 +144,22 @@ def case_delete(request, pk):
         case.delete()
         return redirect('case_list')
     return render(request, 'cases/case_confirm_delete.html', {'case': case})
+
+
+
+@login_required
+def case_analysis(request):
+    # Get case counts by county
+    county_data = Case.objects.values('county').annotate(total=Count('id')).order_by('-total')
+
+    # Get case counts by sub-county and case type (for when county is selected)
+    subcounty_data = Case.objects.values('sub_county', 'case_type').annotate(total=Count('id')).order_by('-total')
+
+    return render(request, 'cases/case_analysis.html', {
+        'county_data': county_data,
+        'subcounty_data': subcounty_data
+    })
+
 
 
 

@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block title %}Case Analysis{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Case Analysis</h2>
+    <div class="mb-4">
+        <label for="county-select">Select County:</label>
+        <select id="county-select" class="form-control">
+            <option value="">All Counties</option>
+            {% for county in county_data %}
+                <option value="{{ county.county }}">{{ county.county }} ({{ county.total }} cases)</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <canvas id="county-chart" width="400" height="200"></canvas>
+
+    <canvas id="subcounty-chart" width="400" height="200" style="display:none;"></canvas>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    var countyData = {
+        labels: [{% for county in county_data %}"{{ county.county }}", {% endfor %}],
+        datasets: [{
+            label: 'Number of Cases',
+            data: [{% for county in county_data %}{{ county.total }}, {% endfor %}],
+            backgroundColor: 'rgba(54, 162, 235, 0.6)',
+            borderColor: 'rgba(54, 162, 235, 1)',
+            borderWidth: 1
+        }]
+    };
+
+    var ctx = document.getElementById('county-chart').getContext('2d');
+    var countyChart = new Chart(ctx, {
+        type: 'bar',
+        data: countyData,
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    document.getElementById('county-select').addEventListener('change', function() {
+        var county = this.value;
+
+        if (county) {
+            // Filter data for the selected county
+            var subcountyData = {
+                labels: [{% for subcounty in subcounty_data if subcounty.county == county %}"{{ subcounty.sub_county }}", {% endfor %}],
+                datasets: [{
+                    label: 'Cases by Type',
+                    data: [{% for subcounty in subcounty_data if subcounty.county == county %}{{ subcounty.total }}, {% endfor %}],
+                    backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }]
+            };
+
+            var ctxSubcounty = document.getElementById('subcounty-chart').getContext('2d');
+            document.getElementById('subcounty-chart').style.display = 'block';
+            
+            new Chart(ctxSubcounty, {
+                type: 'bar',
+                data: subcountyData,
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        } else {
+            // Reset if no county selected
+            document.getElementById('subcounty-chart').style.display = 'none';
+        }
+    });
+</script>
+{% endblock %}
