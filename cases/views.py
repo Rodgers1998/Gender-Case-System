@@ -12,7 +12,7 @@ from django.http import HttpResponse
 from django.shortcuts import render
 from django.db.models import Count
 from .models import Case
-from django.utils.timezone import now
+
 
 
 def register(request):
@@ -82,27 +82,9 @@ def case_list(request):
         # Normal user can only see their own cases, including past court dates
         all_cases = Case.objects.filter(user=request.user).order_by('next_court_date')
 
-@login_required
-def case_list(request):
-    query = request.GET.get('q')
-    filter_option = request.GET.get('filter')  # Get filter option from the query parameter
-
-    # Get today's date
-    today = now().date()
-
-    if filter_option == "today":
-        # Filter cases that were created today
-        all_cases = Case.objects.filter(created_at__date=today).order_by('next_court_date')
-    else:
-        # If no filter, show all cases
-        if request.user.is_superuser:
-            all_cases = Case.objects.all().order_by('next_court_date')
-        else:
-            all_cases = Case.objects.filter(user=request.user).order_by('next_court_date')
-
-    # If a search query is provided, filter cases based on it
+    # If a search query is provided, filter based on it
     if query:
-        upcoming_cases = upcoming_cases.filter(
+        all_cases = all_cases.filter(
             Q(case_number__icontains=query) |
             Q(case_type__icontains=query) |
             Q(accused_name__icontains=query) |
@@ -124,8 +106,8 @@ def case_list(request):
     page_number = request.GET.get('page')
     cases = paginator.get_page(page_number)
 
+    # Render the case list template with all cases
     return render(request, 'cases/case_list.html', {'cases': cases})
-
 
 
 
