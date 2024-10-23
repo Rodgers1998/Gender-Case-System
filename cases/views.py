@@ -12,7 +12,7 @@ from django.http import HttpResponse
 from django.shortcuts import render
 from django.db.models import Count
 from .models import Case
-
+from django.utils.timezone import now
 
 
 def register(request):
@@ -85,23 +85,22 @@ def case_list(request):
 @login_required
 def case_list(request):
     query = request.GET.get('q')
-    filter_option = request.GET.get('filter')  # Get filter option from URL
+    filter_option = request.GET.get('filter')  # Get filter option from the query parameter
 
-    # Initialize the variable to an empty queryset to avoid UnboundLocalError
-    all_cases = Case.objects.none()
+    # Get today's date
+    today = now().date()
 
     if filter_option == "today":
-        # Filter cases that have been created today
-        all_cases = Case.objects.filter(court_date=date.today()).order_by('next_court_date')
+        # Filter cases that were created today
+        all_cases = Case.objects.filter(created_at__date=today).order_by('next_court_date')
     else:
+        # If no filter, show all cases
         if request.user.is_superuser:
-            # Admin (superuser) can view all cases
             all_cases = Case.objects.all().order_by('next_court_date')
         else:
-            # Normal user can only see their own cases
             all_cases = Case.objects.filter(user=request.user).order_by('next_court_date')
 
-    # If a search query is provided, filter the cases based on it
+    # If a search query is provided, filter cases based on it
     if query:
         upcoming_cases = upcoming_cases.filter(
             Q(case_number__icontains=query) |

@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils import timezone
 
 
 class Case(models.Model):
@@ -91,6 +92,8 @@ class Case(models.Model):
     location = models.CharField(max_length=255, null=True)
 
     ward = models.CharField(max_length=255, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)  # Automatically set the creation time when the case is added
+
 
     def __str__(self):
         return self.case_number
