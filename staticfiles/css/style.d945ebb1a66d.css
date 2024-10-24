@@ -32,6 +32,11 @@
     background-color: #ffc107;
 }
 
+/* New button for Case Analysis */
+.btn-success {
+    background-color: #28a745;
+}
+
 .dashboard {
     display: flex;
     justify-content: space-between;
@@ -108,6 +113,11 @@
         background-color: #ffc107;
         color: #fff;
     }
+
+    .button-container a[data-short="C"] {
+        background-color: #28a745;
+        color: #fff;
+    }
 }
 
 .dashboard-image {
@@ -115,7 +125,6 @@
     height: auto; /* Maintain aspect ratio */
     display: block;
     margin: 0 auto;
-    /* Add additional styling as needed */
 }
 
 /* Ensure the navbar is displayed as a flex container */
@@ -131,7 +140,6 @@
 .dashboard-image {
     width: 100px; /* Adjust size as needed */
     height: auto; /* Maintain aspect ratio */
-    /* Add any additional styling if needed */
 }
 
 /* Style the link to the image */
@@ -139,7 +147,6 @@
     margin-right: auto; /* Pushes the link to the left */
 }
 
-/* Add this to your static CSS file */
 .table th, .table td {
     text-align: center;
 }
@@ -159,7 +166,6 @@
     border-radius: 5px;
 }
 
-/* Add this to your static CSS file */
 .table th, .table td {
     text-align: center;
 }
@@ -194,7 +200,11 @@
     border-color: #dc3545; /* Border color for danger button */
 }
 
-.btn-info:hover, .btn-warning:hover, .btn-danger:hover {
-    opacity: 0.8; /* Slightly transparent on hover */
+.btn-success {
+    background-color: #28a745; /* Success button (Case Analysis) */
+    border-color: #28a745; /* Border color for success button */
 }
 
+.btn-info:hover, .btn-warning:hover, .btn-danger:hover, .btn-success:hover {
+    opacity: 0.8; /* Slightly transparent on hover */
+}
