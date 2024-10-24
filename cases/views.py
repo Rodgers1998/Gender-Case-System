@@ -71,18 +71,24 @@ def home(request):
 @login_required
 def case_list(request):
     query = request.GET.get('q')
+    filter_type = request.GET.get('filter')  # To determine if 'today' filter is active
 
     # Initialize the variable to an empty queryset to avoid UnboundLocalError
     all_cases = Case.objects.none()
 
     if request.user.is_superuser:
-        # Admin (superuser) can view all cases, including those with past court dates
+        # Admin (superuser) can view all cases
         all_cases = Case.objects.all().order_by('next_court_date')
     else:
-        # Normal user can only see their own cases, including past court dates
+        # Normal user can only see their own cases
         all_cases = Case.objects.filter(user=request.user).order_by('next_court_date')
 
-    # If a search query is provided, filter based on it
+    # Filter for today's cases
+    if filter_type == 'today':
+        today = date.today()
+        all_cases = all_cases.filter(case_registration_date=today)  # Use case_registration_date to filter today's cases
+
+    # If a search query is provided, filter the results based on it
     if query:
         all_cases = all_cases.filter(
             Q(case_number__icontains=query) |
@@ -97,8 +103,8 @@ def case_list(request):
             Q(stage_of_case__icontains=query) |
             Q(ward__icontains=query) |
             Q(police_station__icontains=query) |
-            Q(county__icontains=query) |          # Added county
-            Q(sub_county__icontains=query)        # Added sub-county
+            Q(county__icontains=query) |          # Filter by county
+            Q(sub_county__icontains=query)        # Filter by sub-county
         )
 
     # Pagination - Show 10 cases per page
@@ -108,6 +114,7 @@ def case_list(request):
 
     # Render the case list template with all cases
     return render(request, 'cases/case_list.html', {'cases': cases})
+
 
 
 
@@ -122,8 +129,9 @@ def case_create(request):
         if form.is_valid():
             case = form.save(commit=False)  # Don't save to the database yet
             case.user = request.user  # Assign the current logged-in user
-            case.save()  # Now save the case to the database
-            return redirect('case_list')  # Redirect to the case list or another view
+            case.case_registration_date = date.today()  # Manually set the case registration date to today
+            case.save()  # Save the case to the database
+            return redirect('case_list')
     else:
         form = CaseForm()
     return render(request, 'cases/case_form.html', {'form': form})
