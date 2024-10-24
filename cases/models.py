@@ -76,7 +76,6 @@ class Case(models.Model):
     case_number = models.CharField(max_length=100, unique=True)
     court_file_number = models.CharField(max_length=100, blank=True, null=True)  # Added court file number
     case_type = models.CharField(max_length=100, choices=CASE_TYPE_CHOICES)
-    case_registration_date = models.DateField(null=True, blank=True)
     accused_name = models.CharField(max_length=255)
     accuser_name = models.CharField(max_length=255)
     accuser_phone = models.CharField(max_length=15)
@@ -90,8 +89,8 @@ class Case(models.Model):
     county= models.CharField(max_length=255, choices=COUNTY_CHOICES, blank=True, null=True)
     sub_county = models.CharField(max_length=255, choices=SUB_COUNTY_CHOICES, blank=True, null=True)  # Added Sub-County field
     location = models.CharField(max_length=255, null=True)
+
     ward = models.CharField(max_length=255, null=True)
-      # Custom field to store the registration date
 
     def __str__(self):
         return self.case_number
