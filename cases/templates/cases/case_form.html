@@ -39,21 +39,19 @@
         const stageOfCase = $('#id_stage_of_case').val();
         
         if (stageOfCase === 'sentencing') {
-            $('#sentence-duration-field').show();
-            $('#jail-duration-field').hide();
+            $('#id_sentence_duration').closest('.form-group').show();
+            $('#id_jail_duration').closest('.form-group').hide();
         } else if (stageOfCase === 'jailing') {
-            $('#jail-duration-field').show();
-            $('#sentence-duration-field').hide();
+            $('#id_jail_duration').closest('.form-group').show();
+            $('#id_sentence_duration').closest('.form-group').hide();
         } else {
-            $('#sentence-duration-field').hide();
-            $('#jail-duration-field').hide();
+            $('#id_sentence_duration').closest('.form-group').hide();
+            $('#id_jail_duration').closest('.form-group').hide();
         }
     }
 
-    // Initial check on page load
     toggleDurationFields();
 
-    // Update fields visibility whenever "Stage of Case" changes
     $('#id_stage_of_case').change(toggleDurationFields);
 
     // Dynamic display for sub-counties based on selected county
