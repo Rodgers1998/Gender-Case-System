@@ -116,16 +116,17 @@ def case_detail(request, pk):
     return render(request, 'cases/case_detail.html', {'case': case})
 
 @login_required
-def create_case(request):
+def case_create(request):
     if request.method == 'POST':
         form = CaseForm(request.POST)
         if form.is_valid():
-            form.save()
-            return redirect('success_url')  # replace 'success_url' with your redirect URL
+            case = form.save(commit=False)  # Don't save to the database yet
+            case.user = request.user  # Assign the current logged-in user
+            case.save()  # Now save the case to the database
+            return redirect('case_list')  # Redirect to the case list or another view
     else:
         form = CaseForm()
-
-    return render(request, 'case_form.html', {'form': form})
+    return render(request, 'cases/case_form.html', {'form': form})
 
 def case_update(request, pk):
     case = get_object_or_404(Case, pk=pk)
