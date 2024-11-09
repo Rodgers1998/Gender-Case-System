@@ -86,8 +86,8 @@ class Case(models.Model):
     investigating_officer = models.CharField(max_length=255)
     investigating_officer_phone = models.CharField(max_length=15)
     stage_of_case = models.CharField(max_length=100, choices=STAGE_OF_CASE_CHOICES)
-    sentence_duration = models.IntegerField(blank=True, null=True, help_text="Sentencing duration in months or years")  # New field
-    jail_duration = models.IntegerField(blank=True, null=True, help_text="Jail duration in months or years")  # New field
+    sentence_duration = models.CharField(max_length=255,blank=True, null=True, help_text="Sentencing duration in months or years")  # New field
+    jail_duration = models.CharField(max_length=255,blank=True, null=True, help_text="Jail duration in months or years")  # New field
     county= models.CharField(max_length=255, choices=COUNTY_CHOICES, blank=True, null=True)
     sub_county = models.CharField(max_length=255, choices=SUB_COUNTY_CHOICES, blank=True, null=True)  # Added Sub-County field
     location = models.CharField(max_length=255, null=True)

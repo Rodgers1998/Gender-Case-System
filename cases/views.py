@@ -119,14 +119,19 @@ def case_detail(request, pk):
 def case_create(request):
     if request.method == 'POST':
         form = CaseForm(request.POST)
+        print("POST data:", request.POST)  # Debug POST data
         if form.is_valid():
             case = form.save(commit=False)  # Don't save to the database yet
             case.user = request.user  # Assign the current logged-in user
+            print("Cleaned data before saving:", form.cleaned_data)  # Debug cleaned data
             case.save()  # Now save the case to the database
             return redirect('case_list')  # Redirect to the case list or another view
+        else:
+            print("Form errors:", form.errors)  # Print any form errors
     else:
         form = CaseForm()
     return render(request, 'cases/case_form.html', {'form': form})
+
 
 def case_update(request, pk):
     case = get_object_or_404(Case, pk=pk)
@@ -191,11 +196,10 @@ from django.conf import settings
 from django.http import HttpResponse
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
-from reportlab.lib import colors
 from reportlab.lib.units import inch
+from reportlab.lib import colors
 from reportlab.platypus import Table, TableStyle
 from .models import Case  # Adjust based on your model's location
-
 
 def generate_case_pdf(request, case_id):
     case = Case.objects.get(pk=case_id)
@@ -207,27 +211,37 @@ def generate_case_pdf(request, case_id):
     p = canvas.Canvas(response, pagesize=letter)
     width, height = letter
 
+    # Draw border for the document
+    border_margin = 30
+    p.setStrokeColor(colors.black)
+    p.setLineWidth(1)
+    p.rect(border_margin, border_margin, width - 2 * border_margin, height - 2 * border_margin)
+
     # Add logo (if available)
     logo_path = os.path.join(settings.STATIC_ROOT, 'images/shofco.png')
     if os.path.exists(logo_path):
-        p.drawImage(logo_path, 100, height - 100, width=2 * inch, height=0.75 * inch)
+        p.drawImage(logo_path, width / 2 - inch, height - 100, width=2 * inch, height=0.75 * inch)
 
-    # Title
+    # "Gender Department Case" Title
+    p.setFont("Helvetica-Bold", 16)
+    p.drawCentredString(width / 2, height - 130, "Gender Department Case")
+
+    # Case Details Title
     p.setFont("Helvetica-Bold", 18)
-    p.drawString(100, height - 150, "Case Detail")
+    p.drawCentredString(width / 2, height - 160, "Case Detail")
 
     # Case Details Formatting
     p.setFont("Helvetica", 12)
-    line_height = 14  # Adjust spacing between lines
-    y_position = height - 180  # Initial y-position for content
+    line_height = 14
+    y_position = height - 200  # Adjusted position for content
 
-    # Helper function to draw label and value like in case_detail.html
+    # Helper function to draw label and value with full page width formatting
     def draw_detail(label, value):
         nonlocal y_position
         p.setFont("Helvetica-Bold", 12)
-        p.drawString(100, y_position, f"{label}:")
+        p.drawString(border_margin + 10, y_position, f"{label}:")
         p.setFont("Helvetica", 12)
-        p.drawString(250, y_position, str(value) if value else "N/A")  # Handles None values gracefully
+        p.drawString(border_margin + 150, y_position, str(value) if value else "N/A")
         y_position -= line_height
 
     # Render each case detail
@@ -244,21 +258,30 @@ def generate_case_pdf(request, case_id):
     draw_detail("Investigating Officer", case.investigating_officer)
     draw_detail("IO Phone No", case.investigating_officer_phone)
     draw_detail("Stage of Case", case.get_stage_of_case_display())
+    # Conditionally render Sentencing and Jailing Duration
+    if case.sentence_duration:
+        draw_detail("Sentencing Duration", case.sentence_duration)
+    if case.jail_duration:
+        draw_detail("Jailing Duration", case.jail_duration)
     draw_detail("County", case.county)
     draw_detail("Sub-County", case.sub_county)
     draw_detail("Location", case.location)
     draw_detail("Ward", case.ward)
+
     
 
-    # Case Officer and Signatures
+    # Add Case Officer and Signatures
     y_position -= 30  # Add space before signatures
-    p.drawString(100, y_position, f"Case Officer: {case_officer}")
-    p.drawString(300, y_position, "Sign: ______________________")
-    y_position -= 70  # Adjust space for Stamp
-    p.drawString(300, y_position, "Stamp: ")
+    p.drawString(border_margin + 10, y_position, f"Case Officer: {case_officer}")
+    p.drawString(width - border_margin - 200, y_position, "Sign: ______________________")
+    y_position -= 70  # Space for Stamp
+    p.drawString(width - border_margin - 200, y_position, "Stamp: ")
 
     # Finalize PDF
     p.showPage()
     p.save()
+
+    return response
+
 
     return response

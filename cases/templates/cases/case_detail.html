@@ -46,10 +46,22 @@
                 <dt class="col-sm-4">Stage of Case:</dt>
                 <dd class="col-sm-8">{{ case.get_stage_of_case_display }}</dd>
 
-                <dt class="col-sm-4">County:</dt>  <!-- Added County field -->
+                <!-- Conditionally render Sentencing Duration only if it has a value -->
+                {% if case.sentence_duration %}
+                    <dt class="col-sm-4">Sentencing Duration:</dt>
+                    <dd class="col-sm-8">{{ case.sentence_duration }}</dd>
+                {% endif %}
+
+                <!-- Conditionally render Jailing Duration only if it has a value -->
+                {% if case.jail_duration %}
+                    <dt class="col-sm-4">Jailing Duration:</dt>
+                    <dd class="col-sm-8">{{ case.jail_duration }}</dd>
+                {% endif %}
+
+                <dt class="col-sm-4">County:</dt>
                 <dd class="col-sm-8">{{ case.county }}</dd>
 
-                <dt class="col-sm-4">Sub-County:</dt>  <!-- Already present Sub-County field -->
+                <dt class="col-sm-4">Sub-County:</dt>
                 <dd class="col-sm-8">{{ case.sub_county }}</dd>
 
                 <dt class="col-sm-4">Location:</dt>
@@ -57,6 +69,8 @@
 
                 <dt class="col-sm-4">Ward:</dt>
                 <dd class="col-sm-8">{{ case.ward }}</dd>
+
+                
             </dl>
 
             <div class="mt-4">
