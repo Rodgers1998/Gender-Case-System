@@ -6,24 +6,27 @@
     <h2 class="mb-4">Create a New Case</h2>
     <form method="POST" class="form-horizontal">
         {% csrf_token %}
-        {{ form|crispy }}
 
-        {% comment %} <div class="form-group">
-            <label for="id_county">County:</label>
-            <select id="id_county" name="county" class="form-control">
-                <option value="">Select a county</option>
-                {% for key, value in form.fields.county.choices %}
-                    <option value="{{ key }}">{{ value }}</option>
-                {% endfor %}
-            </select>
+        <!-- Display all form fields except sentencing and jailing duration -->
+        {% for field in form %}
+            {% if field.name not in "sentence_duration" and field.name not in "jail_duration" %}
+                <div class="form-group">
+                    {{ field.label_tag }} {{ field }}
+                </div>
+            {% endif %}
+        {% endfor %}
+
+        <!-- Sentence Duration Field (only visible when "Sentencing" is selected) -->
+        <div id="sentence-duration-field" class="form-group" style="display: none;">
+            <label for="id_sentence_duration">Sentencing Duration (in months/years):</label>
+            <input type="text" name="sentence_duration" id="id_sentence_duration" class="form-control" placeholder="Enter duration (e.g., '2 years')">
         </div>
 
-        <div class="form-group">
-            <label for="id_sub_county">Sub-County:</label>
-            <select id="id_sub_county" name="sub_county" class="form-control">
-                <option value="">Select a sub-county</option>
-            </select>
-        </div> {% endcomment %}
+        <!-- Jail Duration Field (only visible when "Jailing" is selected) -->
+        <div id="jail-duration-field" class="form-group" style="display: none;">
+            <label for="id_jail_duration">Jailing Duration (in months/years):</label>
+            <input type="text" name="jail_duration" id="id_jail_duration" class="form-control" placeholder="Enter duration (e.g., '2 years')">
+        </div>
 
         <button type="submit" class="btn btn-success mt-3">Save Case</button>
     </form>
@@ -31,6 +34,29 @@
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
+    // Function to toggle display of sentencing and jailing duration fields
+    function toggleDurationFields() {
+        const stageOfCase = $('#id_stage_of_case').val();
+        
+        if (stageOfCase === 'sentencing') {
+            $('#sentence-duration-field').show();
+            $('#jail-duration-field').hide();
+        } else if (stageOfCase === 'jailing') {
+            $('#jail-duration-field').show();
+            $('#sentence-duration-field').hide();
+        } else {
+            $('#sentence-duration-field').hide();
+            $('#jail-duration-field').hide();
+        }
+    }
+
+    // Initial check on page load
+    toggleDurationFields();
+
+    // Update fields visibility whenever "Stage of Case" changes
+    $('#id_stage_of_case').change(toggleDurationFields);
+
+    // Dynamic display for sub-counties based on selected county
     const subCountyData = {
         'mombasa': ['Changamwe', 'Jomvu', 'Kisauni', 'Likoni', 'Mvita', 'Nyali'],
         'kwale': ['Matuga', 'Msambweni', 'Lunga Lunga', 'Kinango'],
@@ -43,8 +69,8 @@
     $('#id_county').change(function () {
         const county = $(this).val();
         const subCountySelect = $('#id_sub_county');
-        subCountySelect.empty(); // Clear current options
-        subCountySelect.append('<option value="">Select a sub-county</option>'); // Add default option
+        subCountySelect.empty();
+        subCountySelect.append('<option value="">Select a sub-county</option>');
 
         if (county) {
             const subCounties = subCountyData[county];

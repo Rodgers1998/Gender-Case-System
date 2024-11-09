@@ -28,13 +28,12 @@ class UserRegistrationForm(forms.ModelForm):
             user.save()
         return user
 
-
 class CaseForm(forms.ModelForm):
     class Meta:
         model = Case
         fields = [
             'case_number', 
-            'court_file_number',  # Added court file number
+            'court_file_number',  
             'case_type', 
             'accused_name', 
             'accuser_name', 
@@ -47,14 +46,16 @@ class CaseForm(forms.ModelForm):
             'investigating_officer_phone', 
             'stage_of_case',
             'county',
-            'sub_county',  # Added sub-county
+            'sub_county',
             'location', 
-            'ward',  
+            'ward',
+            'sentence_duration',  # Added field for sentencing duration
+            'jail_duration',      # Added field for jailing duration
         ]
         widgets = {
             'case_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter Case Number'}),
-            'court_file_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter Court File Number'}),  # New widget for court file number
-            'case_type': forms.Select(attrs={'class': 'form-control'}),  # Dropdown for case types
+            'court_file_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter Court File Number'}),
+            'case_type': forms.Select(attrs={'class': 'form-control'}),
             'accused_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter Accused Name'}),
             'accuser_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter Accuser Name'}),
             'accuser_phone': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter Accuser Phone'}),
@@ -64,9 +65,28 @@ class CaseForm(forms.ModelForm):
             'police_station': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter Police Station'}),
             'investigating_officer': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter Officer Name'}),
             'investigating_officer_phone': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter Officer Phone'}),
-            'stage_of_case': forms.Select(attrs={'class': 'form-control'}),  # Dropdown for stage of case
+            'stage_of_case': forms.Select(attrs={'class': 'form-control'}), 
             'county': forms.Select(attrs={'class': 'form-control'}),
             'sub_county': forms.Select(attrs={'class': 'form-control'}),
-            'location': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter Location'}),  # Dropdown for locations
-            'ward': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter Ward'}),  
+            'location': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter Location'}),
+            'ward': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter Ward'}),
+            'sentence_duration': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter sentencing duration (e.g., "2 years")'}),
+            'jail_duration': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter jailing duration (e.g., "2 years")'}),
         }
+
+
+    def clean(self):
+        cleaned_data = super().clean()
+        stage_of_case = cleaned_data.get('stage_of_case')
+        sentence_duration = cleaned_data.get('sentence_duration')
+        jail_duration = cleaned_data.get('jail_duration')
+
+        # Validation for sentencing duration
+        if stage_of_case == 'sentencing' and not sentence_duration:
+            self.add_error('sentence_duration', "Please specify the sentencing duration.")
+        
+        # Validation for jailing duration
+        if stage_of_case == 'jailing' and not jail_duration:
+            self.add_error('jail_duration', "Please specify the jailing duration.")
+        
+        return cleaned_data

@@ -68,8 +68,8 @@ class Case(models.Model):
         ('judgement', 'Judgement'),
         ('mention', 'Mention'),
         ('rulling', 'Rulling'),
-        ('sentencing_3_years', 'Sentencing for 3 years'),  # Added
-        ('jailed_10_years', 'Jailed for 10 years'),  # Added
+        ('sentencing', 'Sentencing'),  # Modified to allow custom durations
+        ('jailing', 'Jailing'), 
     ]
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -86,6 +86,8 @@ class Case(models.Model):
     investigating_officer = models.CharField(max_length=255)
     investigating_officer_phone = models.CharField(max_length=15)
     stage_of_case = models.CharField(max_length=100, choices=STAGE_OF_CASE_CHOICES)
+    sentence_duration = models.IntegerField(blank=True, null=True, help_text="Sentencing duration in months or years")  # New field
+    jail_duration = models.IntegerField(blank=True, null=True, help_text="Jail duration in months or years")  # New field
     county= models.CharField(max_length=255, choices=COUNTY_CHOICES, blank=True, null=True)
     sub_county = models.CharField(max_length=255, choices=SUB_COUNTY_CHOICES, blank=True, null=True)  # Added Sub-County field
     location = models.CharField(max_length=255, null=True)
