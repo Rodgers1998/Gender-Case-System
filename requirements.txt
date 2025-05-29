@@ -9,7 +9,7 @@ django-heroku==0.3.1
 gunicorn==23.0.0
 packaging==24.1
 pillow==10.4.0
-psycopg2==2.9.9
+psycopg2
 python-decouple==3.8
 reportlab==4.2.5
 sqlparse==0.5.1
