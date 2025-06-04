@@ -22,7 +22,7 @@ DEBUG = True
 
 # ALLOWED_HOSTS = ['gender-cases-bdad1a0e7e53.herokuapp.com']
 
-ALLOWED_HOSTS = [ 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = [ 'localhost', '127.0.0.1','gender-case-system.onrender.com']
 
 
 # Application definition
