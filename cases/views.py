@@ -1,18 +1,23 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import Case
-from .forms import CaseForm
-from datetime import date
-from django.db.models import Q
-from django.contrib.auth import login, logout
-from .forms import UserRegistrationForm
 from django.contrib.auth.decorators import login_required
-from django.core.paginator import Paginator
+from django.contrib.auth import login, logout
 from django.http import HttpResponse
+from django.db.models import Q, Count, Min
+from django.core.paginator import Paginator
+from django.conf import settings
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter
+from reportlab.lib.units import inch
+from reportlab.lib import colors
+import os
+from datetime import date
 
-from django.shortcuts import render
 from django.db.models import Count
+from django.db.models.functions import TruncMonth
 from .models import Case
 
+from .models import Case
+from .forms import CaseForm, UserRegistrationForm
 
 
 def register(request):
@@ -25,114 +30,97 @@ def register(request):
         form = UserRegistrationForm()
     return render(request, 'register.html', {'form': form})
 
+
 def custom_logout(request):
-    logout(request)  # Log the user out
-    return render(request, 'cases/logout.html')  # Render your custom logout template
+    logout(request)
+    return render(request, 'cases/logout.html')
+
+
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from django.db.models import Q
+from datetime import date
+from .models import Case
 
 @login_required
 def home(request):
     query = request.GET.get('q')
+    today = date.today()
 
-    # Filter for upcoming cases based on the next_court_date
     if request.user.is_superuser:
-        # Admin (superuser) can view all upcoming cases
-        upcoming_cases = Case.objects.filter(next_court_date__gte=date.today()).order_by('next_court_date')
+        upcoming_cases = Case.objects.filter(date_of_court_followup__gte=today).order_by('date_of_court_followup')
     else:
-        # Normal user can only see their own upcoming cases
-        upcoming_cases = Case.objects.filter(user=request.user, next_court_date__gte=date.today()).order_by('next_court_date')
+        upcoming_cases = Case.objects.filter(user=request.user, date_of_court_followup__gte=today).order_by('date_of_court_followup')
 
-    # If a search query is provided, filter the upcoming cases based on it
     if query:
         upcoming_cases = upcoming_cases.filter(
-            Q(case_number__icontains=query) |
-            Q(case_type__icontains=query) |
-            Q(accused_name__icontains=query) |
-            Q(accuser_name__icontains=query) |
-            Q(accuser_phone__icontains=query) |
-            Q(investigating_officer__icontains=query) |
-            Q(investigating_officer_phone__icontains=query) |
-            Q(location__icontains=query) |
-            Q(court_name__icontains=query) |
-            Q(stage_of_case__icontains=query) |
-            Q(ward__icontains=query) |
-            Q(police_station__icontains=query) |
-            Q(county__icontains=query) |          # Added county
-            Q(sub_county__icontains=query)        # Added sub-county
+            Q(previous_case_number__icontains=query) |
+            Q(assault_type__icontains=query) |
+            Q(stage_of_case_in_court__icontains=query) |
+            Q(site__icontains=query) |
+            Q(gender_site_code_of_reporting__icontains=query)
         )
 
+    upcoming_cases = upcoming_cases[:10]
 
-    # Limit to the top 10 upcoming cases after filtering
-    upcoming_cases = upcoming_cases[:10]  # Change from 5 to 10
+    # Additional metrics
+    female_count = Case.objects.filter(survivor_gender__iexact='female').count()
+    male_count = Case.objects.filter(survivor_gender__iexact='male').count()
 
-    # Render the home template with the filtered upcoming cases
-    return render(request, 'cases/home.html', {'upcoming_cases': upcoming_cases})
+    context = {
+        'upcoming_cases': upcoming_cases,
+        'female_count': female_count,
+        'male_count': male_count,
+        'today': today,
+    }
+
+    return render(request, 'cases/home.html', context)
+
 
 
 @login_required
 def case_list(request):
     query = request.GET.get('q')
-
-    # Initialize the variable to an empty queryset to avoid UnboundLocalError
-    all_cases = Case.objects.none()
-
     if request.user.is_superuser:
-        # Admin (superuser) can view all cases, including those with past court dates
-        all_cases = Case.objects.all().order_by('next_court_date')
+        all_cases = Case.objects.all().order_by('-date_of_case_reporting')
     else:
-        # Normal user can only see their own cases, including past court dates
-        all_cases = Case.objects.filter(user=request.user).order_by('next_court_date')
+        all_cases = Case.objects.filter(user=request.user).order_by('-date_of_case_reporting')
 
-    # If a search query is provided, filter based on it
     if query:
         all_cases = all_cases.filter(
-            Q(case_number__icontains=query) |
-            Q(case_type__icontains=query) |
-            Q(accused_name__icontains=query) |
-            Q(accuser_name__icontains=query) |
-            Q(accuser_phone__icontains=query) |
-            Q(investigating_officer__icontains=query) |
-            Q(investigating_officer_phone__icontains=query) |
-            Q(location__icontains=query) |
-            Q(court_name__icontains=query) |
-            Q(stage_of_case__icontains=query) |
-            Q(ward__icontains=query) |
-            Q(police_station__icontains=query) |
-            Q(county__icontains=query) |          # Added county
-            Q(sub_county__icontains=query)        # Added sub-county
+            Q(previous_case_number__icontains=query) |
+            Q(assault_type__icontains=query) |
+            Q(stage_of_case_in_court__icontains=query) |
+            Q(site__icontains=query)
         )
 
-    # Pagination - Show 10 cases per page
     paginator = Paginator(all_cases, 10)
     page_number = request.GET.get('page')
     cases = paginator.get_page(page_number)
-
-    # Render the case list template with all cases
     return render(request, 'cases/case_list.html', {'cases': cases})
 
 
-
+@login_required
 def case_detail(request, pk):
     case = get_object_or_404(Case, pk=pk)
     return render(request, 'cases/case_detail.html', {'case': case})
+
 
 @login_required
 def case_create(request):
     if request.method == 'POST':
         form = CaseForm(request.POST)
-        print("POST data:", request.POST)  # Debug POST data
         if form.is_valid():
-            case = form.save(commit=False)  # Don't save to the database yet
-            case.user = request.user  # Assign the current logged-in user
-            print("Cleaned data before saving:", form.cleaned_data)  # Debug cleaned data
-            case.save()  # Now save the case to the database
-            return redirect('case_list')  # Redirect to the case list or another view
-        else:
-            print("Form errors:", form.errors)  # Print any form errors
+            case = form.save(commit=False)
+            case.user = request.user
+            case.save()
+            return redirect('case_list')
     else:
         form = CaseForm()
     return render(request, 'cases/case_form.html', {'form': form})
 
 
+@login_required
 def case_update(request, pk):
     case = get_object_or_404(Case, pk=pk)
     if request.method == 'POST':
@@ -144,6 +132,8 @@ def case_update(request, pk):
         form = CaseForm(instance=case)
     return render(request, 'cases/case_form.html', {'form': form})
 
+
+@login_required
 def case_delete(request, pk):
     case = get_object_or_404(Case, pk=pk)
     if request.method == 'POST':
@@ -152,136 +142,178 @@ def case_delete(request, pk):
     return render(request, 'cases/case_confirm_delete.html', {'case': case})
 
 
+# views.py
+
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from django.db.models import Count
+from django.db.models.functions import TruncMonth
+from datetime import date
+from .models import Case
+import json
+from collections import defaultdict
 
 @login_required
 def case_analysis(request):
-    # Get case counts by county
-    county_data = Case.objects.values('county').annotate(total=Count('id')).order_by('-total')
+    total = Case.objects.count()
+    closed = Case.objects.filter(case_is_closed=True).count()
+    in_court = Case.objects.filter(case_still_in_court=True).count()
+    female = Case.objects.filter(survivor_gender__iexact='female').count()
+    male = Case.objects.filter(survivor_gender__iexact='male').count()
 
-    # Get case counts by sub-county and case type
-    subcounty_data = Case.objects.values('county', 'sub_county', 'case_type').annotate(total=Count('id')).order_by('county', 'sub_county')
+    gender_data = {
+        'labels': ['Female', 'Male'],
+        'data': [female, male]
+    }
 
-    # Pass the data to the template
-    return render(request, 'cases/case_analysis.html', {
-        'county_data': county_data,
-        'subcounty_data': subcounty_data,
-    })
+    county_queryset = Case.objects.values('county').annotate(total=Count('id')).order_by('-total')
+    county_data = {
+        'labels': [entry['county'] or 'Unknown' for entry in county_queryset],
+        'data': [entry['total'] for entry in county_queryset]
+    }
+
+    subcounty_queryset = Case.objects.values('county', 'case_constituency_name').annotate(total=Count('id')).order_by('-total')
+    subcounty_data = defaultdict(list)
+    for entry in subcounty_queryset:
+        subcounty_data[entry['county'] or 'Unknown'].append({
+            'subcounty': entry['case_constituency_name'] or 'Unknown',
+            'total': entry['total']
+        })
+
+    time_series_queryset = (
+        Case.objects.annotate(month=TruncMonth('date_of_case_reporting'))
+        .values('month')
+        .annotate(count=Count('id'))
+        .order_by('month')
+    )
+    time_series = {
+        'labels': [entry['month'].strftime('%b %Y') for entry in time_series_queryset if entry['month']],
+        'data': [entry['count'] for entry in time_series_queryset if entry['month']]
+    }
+
+    assault_queryset = Case.objects.values('county', 'assault_type').annotate(total=Count('id'))
+    assault_data = defaultdict(lambda: defaultdict(int))
+    assault_types = set()
+
+    for entry in assault_queryset:
+        county = entry['county'] or 'Unknown'
+        assault = entry['assault_type'] or 'Unknown'
+        assault_data[assault][county] += entry['total']
+        assault_types.add(assault)
+
+    counties = sorted({county for counts in assault_data.values() for county in counts})
+    assault_stacked = {
+        'labels': counties,
+        'datasets': [
+            {
+                'label': assault,
+                'data': [assault_data[assault].get(county, 0) for county in counties]
+            } for assault in sorted(assault_types)
+        ]
+    }
+
+    context = {
+        'kpis': {
+            'total': total,
+            'closed': closed,
+            'in_court': in_court,
+            'female': female,
+            'male': male,
+        },
+        'gender_data_json': json.dumps(gender_data),
+        'county_data_json': json.dumps(county_data),
+        'subcounty_data_json': json.dumps({k: v for k, v in subcounty_data.items()}),
+        'time_series_json': json.dumps(time_series),
+        'assault_stacked_json': json.dumps(assault_stacked),
+    }
+
+    return render(request, 'cases/case_analysis.html', context)
+
+
 
 
 
 @login_required
 def upcoming_cases_by_county(request):
-    # Define the counties to filter by
-    counties = ['Mombasa', 'Kwale', 'Kilifi', 'Tana River', 'Lamu', 'Taita-Taveta']
+    # Step 1: Get counties with upcoming cases, annotated by their soonest court date
+    counties_with_soonest_dates = (
+        Case.objects
+        .filter(date_of_court_followup__gte=date.today())
+        .exclude(county__isnull=True)
+        .values('county')
+        .annotate(soonest_date=Min('date_of_court_followup'))
+        .order_by('soonest_date')  # Sort counties by their earliest court date
+    )
 
-    # Dictionary to store the top 5 cases for each county
+    # Step 2: For each county, fetch up to 5 upcoming cases
     cases_by_county = {}
-
-    # Fetch top 5 upcoming cases per county
-    for county in counties:
-        cases = Case.objects.filter(
-            county__iexact=county,
-            next_court_date__gte=date.today()
-        ).order_by('next_court_date')[:5]  # Top 5 upcoming cases per county
+    for entry in counties_with_soonest_dates:
+        county = entry['county']
+        cases = (
+            Case.objects
+            .filter(county=county, date_of_court_followup__gte=date.today())
+            .order_by('date_of_court_followup')[:5]
+        )
         cases_by_county[county] = cases
 
-    return render(request, 'cases/upcoming_cases_by_county.html', {'cases_by_county': cases_by_county})
+    return render(request, 'cases/upcoming_cases_by_county.html', {
+        'cases_by_county': cases_by_county
+    })
 
-
-
-
-
-import os
-from django.conf import settings
-from django.http import HttpResponse
-from reportlab.lib.pagesizes import letter
-from reportlab.pdfgen import canvas
-from reportlab.lib.units import inch
-from reportlab.lib import colors
-from reportlab.platypus import Table, TableStyle
-from .models import Case  # Adjust based on your model's location
-
+@login_required
 def generate_case_pdf(request, case_id):
-    case = Case.objects.get(pk=case_id)
-    case_officer = request.user.username
-
+    case = get_object_or_404(Case, pk=case_id)
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = f'attachment; filename="case_{case_id}.pdf"'
 
     p = canvas.Canvas(response, pagesize=letter)
     width, height = letter
-
-    # Draw border for the document
     border_margin = 30
     p.setStrokeColor(colors.black)
     p.setLineWidth(1)
     p.rect(border_margin, border_margin, width - 2 * border_margin, height - 2 * border_margin)
 
-    # Add logo (if available)
     logo_path = os.path.join(settings.STATIC_ROOT, 'images/shofco.png')
     if os.path.exists(logo_path):
         p.drawImage(logo_path, width / 2 - inch, height - 100, width=2 * inch, height=0.75 * inch)
 
-    # "Gender Department Case" Title
     p.setFont("Helvetica-Bold", 16)
     p.drawCentredString(width / 2, height - 130, "Gender Department Case")
-
-    # Case Details Title
     p.setFont("Helvetica-Bold", 18)
     p.drawCentredString(width / 2, height - 160, "Case Detail")
 
-    # Case Details Formatting
     p.setFont("Helvetica", 12)
     line_height = 14
-    y_position = height - 200  # Adjusted position for content
+    y_position = height - 200
 
-    # Helper function to draw label and value with full page width formatting
     def draw_detail(label, value):
         nonlocal y_position
         p.setFont("Helvetica-Bold", 12)
         p.drawString(border_margin + 10, y_position, f"{label}:")
         p.setFont("Helvetica", 12)
-        p.drawString(border_margin + 150, y_position, str(value) if value else "N/A")
+        p.drawString(border_margin + 160, y_position, str(value) if value else "N/A")
         y_position -= line_height
 
-    # Render each case detail
-    draw_detail("Case Number", case.case_number)
-    draw_detail("Court File Number", case.court_file_number)
-    draw_detail("Case Type", case.case_type)
-    draw_detail("Accused Name", case.accused_name)
-    draw_detail("Accuser Name", case.accuser_name)
-    draw_detail("Accuser Phone", case.accuser_phone)
-    draw_detail("Court Name", case.court_name)
-    draw_detail("Court Date", case.court_date)
-    draw_detail("Next Court Date", case.next_court_date)
-    draw_detail("Police Station", case.police_station)
-    draw_detail("Investigating Officer", case.investigating_officer)
-    draw_detail("IO Phone No", case.investigating_officer_phone)
-    draw_detail("Stage of Case", case.get_stage_of_case_display())
-    # Conditionally render Sentencing and Jailing Duration
-    if case.sentence_duration:
-        draw_detail("Sentencing Duration", case.sentence_duration)
-    if case.jail_duration:
-        draw_detail("Jailing Duration", case.jail_duration)
+    # Draw fields selectively for brevity (or loop through model._meta.fields for full automation)
+    draw_detail("Case ID", case.case_id)
+    draw_detail("Assigned To", case.assigned_to)
+    draw_detail("Previous Case No.", case.previous_case_number)
+    draw_detail("Date of Reporting", case.date_of_case_reporting)
+    draw_detail("Date of Intake", case.date_of_case_intake)
+    draw_detail("Assault Type", case.assault_type)
+    draw_detail("Court Follow-up", case.date_of_court_followup)
+    draw_detail("Stage of Case", case.stage_of_case_in_court)
     draw_detail("County", case.county)
-    draw_detail("Sub-County", case.sub_county)
-    draw_detail("Location", case.location)
-    draw_detail("Ward", case.ward)
+    draw_detail("Constituency", case.case_constituency_name)
+    draw_detail("Ward", case.case_ward_name)
+    draw_detail("Site", case.site)
 
-    
-
-    # Add Case Officer and Signatures
-    y_position -= 30  # Add space before signatures
-    p.drawString(border_margin + 10, y_position, f"Case Officer: {case_officer}")
+    y_position -= 30
+    p.drawString(border_margin + 10, y_position, f"Case Officer: {request.user.username}")
     p.drawString(width - border_margin - 200, y_position, "Sign: ______________________")
-    y_position -= 70  # Space for Stamp
+    y_position -= 70
     p.drawString(width - border_margin - 200, y_position, "Stamp: ")
 
-    # Finalize PDF
     p.showPage()
     p.save()
-
-    return response
-
-
     return response

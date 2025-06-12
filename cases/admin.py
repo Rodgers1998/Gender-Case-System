@@ -1,48 +1,41 @@
 from django.contrib import admin
 from .models import Case
 
+
 @admin.register(Case)
 class CaseAdmin(admin.ModelAdmin):
-    # Display all fields in the list view
+    # Display relevant fields based on the new model
     list_display = (
-        'case_number', 
-        'court_file_number',
-        'case_type', 
-        'accused_name', 
-        'accuser_name', 
-        'accuser_phone', 
-        'court_name', 
-        'court_date', 
-        'next_court_date', 
-        'police_station', 
-        'investigating_officer', 
-        'investigating_officer_phone', 
-        'stage_of_case', 
-        'sentence_duration', 
-        'jail_duration',
-        'county', 
-        'sub_county', 
-        'location', 
-        'ward'
+        'previous_case_number',
+        'assigned_to',
+        'date_of_case_reporting',
+        'assault_type',
+        'site',
+        'cleaned_assault_type',
+        'survivor_gender',
+        'survivor_age',
+        'age_group',
+        'case_is_closed',
+        'case_still_in_court',
+        'stage_of_case_in_court',
     )
 
-    # Add search fields to easily locate cases by specific fields
+    # Enable search on appropriate text fields
     search_fields = (
-        'case_number', 
-        'court_file_number', 
-        'accused_name', 
-        'accuser_name', 
-        'investigating_officer'
+        'assigned_to',
+        'assault_type',
+        'cleaned_assault_type',
+        'site',
+        'stage_of_case_in_court',
     )
 
-    # Add filters for specific fields to refine displayed results
+    # Useful filters
     list_filter = (
-        'case_type', 
-        'county', 
-        'sub_county', 
-        'stage_of_case', 
-        'court_date'
+        'case_is_closed',
+        'case_still_in_court',
+        'survivor_gender',
+        'age_group',
+        'site',
     )
 
-    # Define default ordering
-    ordering = ('court_date', 'case_number')
+    ordering = ('-date_of_case_reporting',)

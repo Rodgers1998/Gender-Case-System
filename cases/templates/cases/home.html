@@ -1,67 +1,113 @@
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title %} G C M{% endblock %}
+{% block title %}Dashboard - Gender Case Management{% endblock %}
 
 {% block content %}
 <div class="container mt-4">
-    <div class="dashboard">
-        <!-- Buttons aligned on the left -->
-        <div class="button-container">
-            <a href="{% url 'case_create' %}" class="btn btn-primary" data-short="A">
-                <i class="bi bi-database-add"></i><br>Add New Case
-            </a>
-        
-            <a href="{% url 'case_list' %}" class="btn btn-secondary" data-short="V">
-                <i class="bi bi-view-list"></i><br>View All Cases
-            </a>
-        
-            {% comment %} <a href="{% url 'case_list' %}?filter=today" class="btn btn-info" data-short="T">
-                <i class="bi bi-calendar-date-fill"></i><br>Today's Cases
-            </a> {% endcomment %}
-        
-            <a href="{% url 'upcoming_cases_by_county' %}" class="btn btn-warning" data-short="U">
-                <i class="bi bi-calendar-month-fill"></i><br>Upcoming Cases
-            </a>
-        
-            <a href="{% url 'case_analysis' %}" class="btn btn-info" data-short="T">
-                <i class="bi bi-bar-chart"></i><br>Case Analysis
-            </a>
+
+  <!-- KPI Cards -->
+  <div class="row mb-4 text-center">
+    <div class="col-md-3 mb-3">
+      <div class="card border-primary shadow">
+        <div class="card-body">
+          <h6 class="text-muted">Upcoming Cases</h6>
+          <h3 class="text-primary">{{ upcoming_cases|length }}</h3>
         </div>
-        
-
-        <!-- Upcoming Cases displayed on the right -->
-        <div class="upcoming-cases mt-4">
-            <h2>Top 10 Upcoming Cases</h2> <!-- Changed from Top 5 to Top 10 -->
-
-            <!-- Search bar for upcoming cases -->
-            <form method="GET" action="{% url 'home' %}" class="form-inline mb-4">
-                <input type="text" name="q" class="form-control mr-2" placeholder="Search upcoming cases..." value="{{ request.GET.q }}">
-                <button type="submit" class="btn btn-primary">Search</button>
-            </form>
-
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th>Case Number</th>
-                        <th>Next Court Date</th>  
-                        <th>Details</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for case in upcoming_cases %}
-                    <tr>
-                        <td>{{ case.case_number }}</td>
-                        <td>{{ case.next_court_date }}</td>  
-                        <td><a href="{% url 'case_detail' case.pk %}" class="btn btn-info btn-sm">View Details</a></td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="3">No upcoming cases</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+      </div>
     </div>
+    <div class="col-md-3 mb-3">
+      <div class="card border-success shadow">
+        <div class="card-body">
+          <h6 class="text-muted">Female Survivors</h6>
+          <h3 class="text-success">{{ female_count|default:0 }}</h3>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3 mb-3">
+      <div class="card border-danger shadow">
+        <div class="card-body">
+          <h6 class="text-muted">Male Survivors</h6>
+          <h3 class="text-danger">{{ male_count|default:0 }}</h3>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3 mb-3">
+      <div class="card border-warning shadow">
+        <div class="card-body">
+          <h6 class="text-muted">Counties Involved</h6>
+          <h3 class="text-warning">{{ upcoming_cases|dictsort:"county"|length }}</h3>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Action Buttons -->
+  <div class="mb-4 d-flex flex-wrap gap-2">
+    <a href="{% url 'case_create' %}" class="btn btn-outline-primary"><i class="bi bi-plus-circle"></i> Add New Case</a>
+    <a href="{% url 'case_list' %}" class="btn btn-outline-secondary"><i class="bi bi-table"></i> All Cases</a>
+    <a href="{% url 'upcoming_cases_by_county' %}" class="btn btn-outline-warning"><i class="bi bi-calendar-event"></i> Upcoming Cases by County</a>
+    <a href="{% url 'case_analysis' %}" class="btn btn-outline-info"><i class="bi bi-graph-up"></i> Case Analysis</a>
+  </div>
+
+  <!-- Search Form -->
+  <form method="GET" class="mb-3">
+    <div class="input-group">
+      <input type="text" name="q" class="form-control" placeholder="Search by case number, county, accuser..." value="{{ request.GET.q }}">
+      <button class="btn btn-primary" type="submit"><i class="bi bi-search"></i> Search</button>
+    </div>
+  </form>
+
+  <!-- Upcoming Cases Table -->
+  <div class="card shadow">
+    <div class="card-header bg-primary text-white">
+      <h5 class="mb-0">Upcoming Court Cases</h5>
+    </div>
+    <div class="card-body table-responsive">
+      <table class="table table-hover table-bordered">
+        <thead class="table-light">
+          <tr>
+            <th>Case Number</th>
+            <th>Court Date</th>
+            <th>County</th>
+            <th>Assigned To</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for case in upcoming_cases %}
+          <tr class="{% if case.date_of_court_followup == today %}table-warning{% endif %}">
+            <td>{{ case.previous_case_number }}</td>
+            <td>{{ case.date_of_court_followup }}</td>
+            <td>{{ case.county }}</td>
+            <td>{{ case.assigned_to|default:"—" }}</td>
+            <td>
+              {% if case.case_still_in_court %}
+                <span class="badge bg-success">In Court</span>
+              {% elif case.case_is_closed %}
+                <span class="badge bg-secondary">Closed</span>
+              {% else %}
+                <span class="badge bg-info">Open</span>
+              {% endif %}
+            </td>
+            <td>
+              <a href="{% url 'case_detail' case.pk %}" class="btn btn-sm btn-outline-info">View</a>
+              <a href="{% url 'case_update' case.pk %}" class="btn btn-sm btn-outline-warning">Edit</a>
+              <a href="{% url 'case_pdf' case.pk %}" class="btn btn-sm btn-outline-secondary">PDF</a>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="6" class="text-center text-muted">No upcoming cases found.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
 </div>
+
+<!-- Optional: Bootstrap Icons -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
 {% endblock %}

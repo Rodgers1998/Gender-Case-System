@@ -11,22 +11,21 @@
         {% for county, cases in cases_by_county.items %}
         <div class="col-md-6 mb-4">
             <table class="table table-striped">
-                <!-- Use the cycle tag to alternate colors -->
                 <thead style="background-color: {% cycle '#007bff' '#28a745' '#ffc107' '#17a2b8' '#fd7e14' '#6f42c1' %};">
                     <tr>
                         <th colspan="3">{{ county }} - Top 5 Upcoming Cases</th>
                     </tr>
                     <tr>
                         <th>Case Number</th>
-                        <th>Next Court Date</th>
+                        <th>Court Follow-up Date</th>
                         <th>Details</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for case in cases %}
                     <tr>
-                        <td>{{ case.case_number }}</td>
-                        <td>{{ case.next_court_date }}</td>
+                        <td>{{ case.previous_case_number | default:case.case_id }}</td>
+                        <td>{{ case.date_of_court_followup }}</td>
                         <td><a href="{% url 'case_detail' case.pk %}" class="btn btn-info btn-sm">View Details</a></td>
                     </tr>
                     {% empty %}
@@ -38,7 +37,6 @@
             </table>
         </div>
 
-        <!-- For every two tables, create a new row -->
         {% if forloop.counter|divisibleby:2 %}
         </div><div class="row">
         {% endif %}

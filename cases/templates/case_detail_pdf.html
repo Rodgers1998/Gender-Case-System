@@ -1,53 +1,83 @@
 {% load static %}
 
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Case Details</title>
     <style>
-        /* Add your styles for the PDF here */
         body {
             font-family: Arial, sans-serif;
+            font-size: 13px;
+        }
+        .container {
+            padding: 20px;
+        }
+        h1, h3 {
+            text-align: center;
+        }
+        .field-label {
+            font-weight: bold;
         }
         .signature {
-            margin-top: 50px;
+            margin-top: 60px;
             display: flex;
             justify-content: space-between;
         }
     </style>
 </head>
 <body>
-    <div style="text-align: center;">
-        <img src="{% static 'images/shofco.png' %}" alt="SHOFCO Logo" style="width: 150px;"/>
-        <h1>Case Details</h1>
-    </div>
-    
-    <p><strong>Case Number:</strong> {{ case.case_number }}</p>
-    <p><strong>Court File Number:</strong> {{ case.court_file_number }}</p>
-    <p><strong>Case Type:</strong> {{ case.case_type }}</p>
-    <p><strong>Accused Name:</strong> {{ case.accused_name }}</p>
-    <p><strong>Accuser Name:</strong> {{ case.accuser_name }}</p>
-    <p><strong>Accuser Phone:</strong> {{ case.accuser_phone }}</p>
-    <p><strong>Court Name:</strong> {{ case.court_name }}</p>
-    <p><strong>Court Date:</strong> {{ case.court_date }}</p>
-    <p><strong>Next Court Date:</strong> {{ case.next_court_date }}</p>
-    <p><strong>Police Station:</strong> {{ case.police_station }}</p>
-    <p><strong>Investigating Officer:</strong> {{ case.investigating_officer }}</p>
-    <p><strong>Investigating Officer Phone NO:</strong> {{ case.investigating_officer_phone }}</p>
-    <p><strong>Stage of Case:</strong> {{ case.get_stage_of_case_display }}</p>
-    <p><strong>Location:</strong> {{ case.location }}</p>
-    <p><strong>Ward:</strong> {{ case.ward }}</p>
-
-    <div class="signature">
-        <div>
-            <p>____________________</p>
-            <p>Signature</p>
+    <div class="container">
+        <div style="text-align: center;">
+            <img src="{% static 'images/shofco.png' %}" alt="SHOFCO Logo" style="width: 150px;" />
+            <h1>Gender Department Case</h1>
+            <h3>Case Details</h3>
         </div>
-        <div>
-            <p>____________________</p>
-            <p>Stamp</p>
+
+        <p><span class="field-label">Case ID:</span> {{ case.case_id }}</p>
+        <p><span class="field-label">Previous Case Number:</span> {{ case.previous_case_number }}</p>
+        <p><span class="field-label">Assigned To:</span> {{ case.assigned_to }}</p>
+
+        <p><span class="field-label">Assault Type:</span> {{ case.assault_type }}</p>
+        <p><span class="field-label">Cleaned Assault Type:</span> {{ case.cleaned_assault_type }}</p>
+
+        <p><span class="field-label">Date of Reporting:</span> {{ case.date_of_case_reporting }}</p>
+        <p><span class="field-label">Date of Intake:</span> {{ case.date_of_case_intake }}</p>
+        <p><span class="field-label">Date of Assignment:</span> {{ case.date_of_case_assignment }}</p>
+        <p><span class="field-label">Date of Closure:</span> {{ case.date_of_case_closure }}</p>
+        <p><span class="field-label">Date of Court Follow-Up:</span> {{ case.date_of_court_followup }}</p>
+        <p><span class="field-label">Stage of Case in Court:</span> {{ case.stage_of_case_in_court }}</p>
+
+        <p><span class="field-label">Medium of Reporting:</span> {{ case.medium_of_reporting }}</p>
+        <p><span class="field-label">Site:</span> {{ case.site }}</p>
+
+        <p><span class="field-label">Survivor Gender:</span> {{ case.survivor_gender }}</p>
+        <p><span class="field-label">Survivor Age:</span> {{ case.survivor_age }}</p>
+        <p><span class="field-label">Age Group:</span> {{ case.age_group }}</p>
+
+        <p><span class="field-label">County:</span> {{ case.county }}</p>
+        <p><span class="field-label">Constituency:</span> {{ case.case_constituency_name }}</p>
+        <p><span class="field-label">Ward:</span> {{ case.case_ward_name }}</p>
+
+        <p><span class="field-label">Is Referred:</span> {{ case.is_case_referred|yesno:"Yes,No" }}</p>
+        <p><span class="field-label">Referred to Police:</span> {{ case.referred_to_police|yesno:"Yes,No" }}</p>
+        <p><span class="field-label">Referred to DCO:</span> {{ case.referred_to_dco|yesno:"Yes,No" }}</p>
+        <p><span class="field-label">Referred to Counseling:</span> {{ case.referred_to_counseling_and_support|yesno:"Yes,No" }}</p>
+        <p><span class="field-label">Referred to Safe House:</span> {{ case.referred_to_safe_house|yesno:"Yes,No" }}</p>
+
+        <p><span class="field-label">Case is Closed:</span> {{ case.case_is_closed|yesno:"Yes,No" }}</p>
+        <p><span class="field-label">Still in Court:</span> {{ case.case_still_in_court|yesno:"Yes,No" }}</p>
+        <p><span class="field-label">Proceeding to Court:</span> {{ case.is_the_case_proceeding_to_court|yesno:"Yes,No" }}</p>
+
+        <div class="signature">
+            <div>
+                <p>________________________</p>
+                <p>Signature</p>
+            </div>
+            <div>
+                <p>________________________</p>
+                <p>Stamp</p>
+            </div>
         </div>
     </div>
 </body>
