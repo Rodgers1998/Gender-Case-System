@@ -7,70 +7,76 @@
         <div class="card-body">
             <h5 class="card-title">Case Information</h5>
             <dl class="row">
-                <dt class="col-sm-4">Case Number:</dt>
-                <dd class="col-sm-8">{{ case.case_number }}</dd>
+                <dt class="col-sm-4">Case ID:</dt>
+                <dd class="col-sm-8">{{ case.case_id }}</dd>
 
-                <dt class="col-sm-4">Court File Number:</dt>
-                <dd class="col-sm-8">{{ case.court_file_number }}</dd>
-
-                <dt class="col-sm-4">Case Type:</dt>
-                <dd class="col-sm-8">{{ case.case_type }}</dd>
-
-                <dt class="col-sm-4">Accused Name:</dt>
-                <dd class="col-sm-8">{{ case.accused_name }}</dd>
-
-                <dt class="col-sm-4">Accuser Name:</dt>
-                <dd class="col-sm-8">{{ case.accuser_name }}</dd>
-
-                <dt class="col-sm-4">Accuser Phone:</dt>
-                <dd class="col-sm-8">{{ case.accuser_phone }}</dd>
-
-                <dt class="col-sm-4">Court Name:</dt>
-                <dd class="col-sm-8">{{ case.court_name }}</dd>
-
-                <dt class="col-sm-4">Court Date:</dt>
-                <dd class="col-sm-8">{{ case.court_date }}</dd>
-
-                <dt class="col-sm-4">Next Court Date:</dt>
-                <dd class="col-sm-8">{{ case.next_court_date }}</dd>
-
-                <dt class="col-sm-4">Police Station:</dt>
-                <dd class="col-sm-8">{{ case.police_station }}</dd>
-
-                <dt class="col-sm-4">Investigating Officer:</dt>
-                <dd class="col-sm-8">{{ case.investigating_officer }}</dd>
-
-                <dt class="col-sm-4">Investigating Officer Phone NO:</dt>
-                <dd class="col-sm-8">{{ case.investigating_officer_phone }}</dd>
-
-                <dt class="col-sm-4">Stage of Case:</dt>
-                <dd class="col-sm-8">{{ case.get_stage_of_case_display }}</dd>
-
-                <!-- Conditionally render Sentencing Duration only if it has a value -->
-                {% if case.sentence_duration %}
-                    <dt class="col-sm-4">Sentencing Duration:</dt>
-                    <dd class="col-sm-8">{{ case.sentence_duration }}</dd>
+                {% if case.previous_case_number %}
+                    <dt class="col-sm-4">Previous Case Number:</dt>
+                    <dd class="col-sm-8">{{ case.previous_case_number }}</dd>
                 {% endif %}
 
-                <!-- Conditionally render Jailing Duration only if it has a value -->
-                {% if case.jail_duration %}
-                    <dt class="col-sm-4">Jailing Duration:</dt>
-                    <dd class="col-sm-8">{{ case.jail_duration }}</dd>
-                {% endif %}
+                <dt class="col-sm-4">Assigned To:</dt>
+                <dd class="col-sm-8">{{ case.assigned_to|default:"N/A" }}</dd>
+
+                <dt class="col-sm-4">Assault Type:</dt>
+                <dd class="col-sm-8">{{ case.assault_type|default:"N/A" }}</dd>
+
+                <dt class="col-sm-4">Cleaned Assault Type:</dt>
+                <dd class="col-sm-8">{{ case.cleaned_assault_type|default:"N/A" }}</dd>
+
+                <dt class="col-sm-4">Date of Case Reporting:</dt>
+                <dd class="col-sm-8">{{ case.date_of_case_reporting }}</dd>
+
+                <dt class="col-sm-4">Date of Intake:</dt>
+                <dd class="col-sm-8">{{ case.date_of_case_intake }}</dd>
+
+                <dt class="col-sm-4">Date of Assignment:</dt>
+                <dd class="col-sm-8">{{ case.date_of_case_assignment }}</dd>
+
+                <dt class="col-sm-4">Date of Court Follow-Up:</dt>
+                <dd class="col-sm-8">{{ case.date_of_court_followup }}</dd>
+
+                <dt class="col-sm-4">Stage of Case in Court:</dt>
+                <dd class="col-sm-8">{{ case.stage_of_case_in_court|default:"N/A" }}</dd>
+
+                <dt class="col-sm-4">Site of Reporting:</dt>
+                <dd class="col-sm-8">{{ case.site|default:"N/A" }}</dd>
+
+                <dt class="col-sm-4">Medium of Reporting:</dt>
+                <dd class="col-sm-8">{{ case.medium_of_reporting|default:"N/A" }}</dd>
+
+                <dt class="col-sm-4">Survivor Gender:</dt>
+                <dd class="col-sm-8">{{ case.survivor_gender }}</dd>
+
+                <dt class="col-sm-4">Survivor Age:</dt>
+                <dd class="col-sm-8">{{ case.survivor_age }}</dd>
+
+                <dt class="col-sm-4">Age Group:</dt>
+                <dd class="col-sm-8">{{ case.age_group }}</dd>
 
                 <dt class="col-sm-4">County:</dt>
                 <dd class="col-sm-8">{{ case.county }}</dd>
 
-                <dt class="col-sm-4">Sub-County:</dt>
-                <dd class="col-sm-8">{{ case.sub_county }}</dd>
-
-                <dt class="col-sm-4">Location:</dt>
-                <dd class="col-sm-8">{{ case.location }}</dd>
+                <dt class="col-sm-4">Constituency:</dt>
+                <dd class="col-sm-8">{{ case.case_constituency_name }}</dd>
 
                 <dt class="col-sm-4">Ward:</dt>
-                <dd class="col-sm-8">{{ case.ward }}</dd>
+                <dd class="col-sm-8">{{ case.case_ward_name }}</dd>
 
-                
+                <dt class="col-sm-4">Case Duration (days):</dt>
+                <dd class="col-sm-8">{{ case.case_duration_in_days }}</dd>
+
+                <dt class="col-sm-4">Days Since Intake:</dt>
+                <dd class="col-sm-8">{{ case.days_since_intake }}</dd>
+
+                <dt class="col-sm-4">Is Case Referred:</dt>
+                <dd class="col-sm-8">{{ case.is_case_referred|yesno:"Yes,No" }}</dd>
+
+                <dt class="col-sm-4">Case Still in Court:</dt>
+                <dd class="col-sm-8">{{ case.case_still_in_court|yesno:"Yes,No" }}</dd>
+
+                <dt class="col-sm-4">Case Closed:</dt>
+                <dd class="col-sm-8">{{ case.case_is_closed|yesno:"Yes,No" }}</dd>
             </dl>
 
             <div class="mt-4">

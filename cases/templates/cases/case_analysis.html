@@ -1,148 +1,186 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Case Analysis{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <h2>Case Analysis</h2>
-    <div class="mb-4">
-        <label for="county-select">Select County:</label>
-        <select id="county-select" class="form-control">
-            <option value="">All Counties</option>
-            {% for county in county_data %}
-                <option value="{{ county.county }}">{{ county.county }} ({{ county.total }} cases)</option>
-            {% endfor %}
-        </select>
+<div class="container-fluid mt-4">
+    <h2 class="mb-4 text-center">Gender Court Case Dashboard</h2>
+
+    <!-- KPIs -->
+    <div class="row text-center mb-4">
+        <div class="col-md-2">
+            <div class="card shadow-sm p-3">
+                <h5>Total Cases</h5>
+                <h3>{{ kpis.total }}</h3>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card shadow-sm p-3">
+                <h5>Closed Cases</h5>
+                <h3>{{ kpis.closed }}</h3>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card shadow-sm p-3">
+                <h5>In Court</h5>
+                <h3>{{ kpis.in_court }}</h3>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card shadow-sm p-3">
+                <h5>Female Survivors</h5>
+                <h3>{{ kpis.female }}</h3>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card shadow-sm p-3">
+                <h5>Male Survivors</h5>
+                <h3>{{ kpis.male }}</h3>
+            </div>
+        </div>
     </div>
 
-    <!-- Main chart for counties -->
-    <canvas id="county-chart" width="400" height="200"></canvas>
+    <!-- Charts Section -->
+    <div class="row">
+        <div class="col-md-6">
+            <h5 class="text-center">Gender Distribution</h5>
+            <canvas id="genderChart"></canvas>
+        </div>
+        <div class="col-md-6">
+            <h5 class="text-center">Cases by County</h5>
+            <canvas id="countyChart"></canvas>
+        </div>
+    </div>
 
-    <!-- Chart for sub-counties, hidden by default -->
-    <canvas id="subcounty-chart" width="400" height="200" style="display:none;"></canvas>
+    <div class="row mt-5">
+        <div class="col-md-6">
+            <h5 class="text-center">Monthly Reported Cases</h5>
+            <canvas id="timeSeriesChart"></canvas>
+        </div>
+        <div class="col-md-6">
+            <h5 class="text-center">Assault Types by County (Stacked)</h5>
+            <canvas id="stackedBarChart"></canvas>
+        </div>
+    </div>
+
+    <div class="row mt-5" id="subcountySection" style="display:none;">
+        <div class="col-md-12">
+            <h5 class="text-center">Cases by Sub-county (click a county to load)</h5>
+            <canvas id="subcountyChart"></canvas>
+        </div>
+    </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    // Create a color palette for the charts
-    const vibrantColors = [
-        'rgba(54, 162, 235, 0.6)',
-        'rgba(255, 99, 132, 0.6)',
-        'rgba(255, 206, 86, 0.6)',
-        'rgba(75, 192, 192, 0.6)',
-        'rgba(153, 102, 255, 0.6)',
-        'rgba(255, 159, 64, 0.6)'
-    ];
+    const genderData = {{ gender_data_json|safe }};
+    const countyData = {{ county_data_json|safe }};
+    const subcountyData = {{ subcounty_data_json|safe }};
+    const timeSeries = {{ time_series_json|safe }};
+    const assaultData = {{ assault_stacked_json|safe }};
 
-    const vibrantBorderColors = [
-        'rgba(54, 162, 235, 1)',
-        'rgba(255, 99, 132, 1)',
-        'rgba(255, 206, 86, 1)',
-        'rgba(75, 192, 192, 1)',
-        'rgba(153, 102, 255, 1)',
-        'rgba(255, 159, 64, 1)'
-    ];
+    const genderChart = new Chart(document.getElementById('genderChart'), {
+        type: 'pie',
+        data: {
+            labels: genderData.labels,
+            datasets: [{
+                data: genderData.data,
+                backgroundColor: ['#f06292', '#64b5f6']
+            }]
+        }
+    });
 
-    // County chart configuration with 3D-like colors
-    var countyData = {
-        labels: [{% for county in county_data %}"{{ county.county }}", {% endfor %}],
-        datasets: [{
-            label: 'Number of Cases',
-            data: [{% for county in county_data %}{{ county.total }}, {% endfor %}],
-            backgroundColor: vibrantColors,
-            borderColor: vibrantBorderColors,
-            borderWidth: 2,
-            hoverBackgroundColor: 'rgba(0, 0, 0, 0.8)',  // Darker color on hover
-            hoverBorderColor: 'rgba(0, 0, 0, 1)'  // Darker border on hover
-        }]
-    };
-
-    var ctx = document.getElementById('county-chart').getContext('2d');
-    var countyChart = new Chart(ctx, {
+    const countyChart = new Chart(document.getElementById('countyChart'), {
         type: 'bar',
-        data: countyData,
+        data: {
+            labels: countyData.labels,
+            datasets: [{
+                label: 'Cases',
+                data: countyData.data,
+                backgroundColor: '#42a5f5'
+            }]
+        },
         options: {
-            plugins: {
-                legend: {
-                    labels: {
-                        color: 'black'  // Legend color
-                    }
+            onClick: (evt, elements) => {
+                if (elements.length > 0) {
+                    const index = elements[0].index;
+                    const selectedCounty = countyData.labels[index];
+                    const subData = subcountyData[selectedCounty] || [];
+
+                    const labels = subData.map(d => d.subcounty);
+                    const data = subData.map(d => d.total);
+
+                    document.getElementById('subcountySection').style.display = 'block';
+
+                    new Chart(document.getElementById('subcountyChart'), {
+                        type: 'bar',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: 'Sub-county Cases',
+                                data: data,
+                                backgroundColor: '#66bb6a'
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            scales: {
+                                y: { beginAtZero: true }
+                            }
+                        }
+                    });
                 }
             },
+            responsive: true,
             scales: {
-                x: {
-                    ticks: {
-                        color: 'black',  // X-axis labels
-                    }
-                },
-                y: {
-                    ticks: {
-                        color: 'black',  // Y-axis labels
-                        beginAtZero: true  // Start Y-axis at 0
-                    }
-                }
+                y: { beginAtZero: true }
             }
         }
     });
 
-    // Subcounty chart configuration
-    document.getElementById('county-select').addEventListener('change', function() {
-        var selectedCounty = this.value;
-        var subCountyData = {
-            labels: [],
+    const timeSeriesChart = new Chart(document.getElementById('timeSeriesChart'), {
+        type: 'line',
+        data: {
+            labels: timeSeries.labels,
             datasets: [{
-                label: 'Cases by Type',
-                data: [],
-                backgroundColor: vibrantColors,
-                borderColor: vibrantBorderColors,
-                borderWidth: 2,
-                hoverBackgroundColor: 'rgba(0, 0, 0, 0.8)',  // Darker color on hover
-                hoverBorderColor: 'rgba(0, 0, 0, 1)'  // Darker border on hover
+                label: 'Monthly Reports',
+                data: timeSeries.data,
+                fill: false,
+                borderColor: '#7e57c2',
+                tension: 0.3
             }]
-        };
-
-        // Loop through the subcounty data and display relevant data for the selected county
-        {% for subcounty in subcounty_data %}
-            if ("{{ subcounty.county }}" === selectedCounty) {
-                subCountyData.labels.push("{{ subcounty.sub_county }} ({{ subcounty.case_type }})");
-                subCountyData.datasets[0].data.push({{ subcounty.total }});
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: { beginAtZero: true }
             }
-        {% endfor %}
-
-        // Show or hide the sub-county chart based on data availability
-        if (subCountyData.labels.length > 0) {
-            var ctxSubcounty = document.getElementById('subcounty-chart').getContext('2d');
-            document.getElementById('subcounty-chart').style.display = 'block';
-
-            new Chart(ctxSubcounty, {
-                type: 'bar',
-                data: subCountyData,
-                options: {
-                    plugins: {
-                        legend: {
-                            labels: {
-                                color: 'black'  // Legend color
-                            }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            ticks: {
-                                color: 'black'  // X-axis labels
-                            }
-                        },
-                        y: {
-                            ticks: {
-                                color: 'black',  // Y-axis labels
-                                beginAtZero: true
-                            }
-                        }
-                    }
-                }
-            });
-        } else {
-            document.getElementById('subcounty-chart').style.display = 'none';
         }
     });
+
+    const stackedBarChart = new Chart(document.getElementById('stackedBarChart'), {
+        type: 'bar',
+        data: {
+            labels: assaultData.labels,
+            datasets: assaultData.datasets.map(ds => ({
+                ...ds,
+                backgroundColor: getRandomColor()
+            }))
+        },
+        options: {
+            responsive: true,
+            plugins: { title: { display: false } },
+            scales: {
+                x: { stacked: true },
+                y: { stacked: true, beginAtZero: true }
+            }
+        }
+    });
+
+    function getRandomColor() {
+        const colors = ['#ef5350', '#ab47bc', '#5c6bc0', '#26a69a', '#ffa726', '#8d6e63'];
+        return colors[Math.floor(Math.random() * colors.length)];
+    }
 </script>
 {% endblock %}

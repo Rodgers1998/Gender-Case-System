@@ -15,21 +15,23 @@
         <thead class="thead-dark">
             <tr>
                 <th>Case Number</th>
-                <th>Case Type</th>
-                <th>Accuser Name</th>
-                <th>Court Name</th> <!-- Newly added -->
-                <th>Stage of Case</th> <!-- Newly added -->
+                <th>Assault Type</th>
+                <th>Assigned To</th>
+                <th>Reported Date</th>
+                <th>Site of Reporting</th>
+                <th>Stage of Case</th>
                 <th>Actions</th>
             </tr>
         </thead>
         <tbody>
             {% for case in cases %}
                 <tr>
-                    <td>{{ case.case_number }}</td>
-                    <td>{{ case.case_type }}</td>
-                    <td>{{ case.accuser_name }}</td>
-                    <td>{{ case.court_name }}</td> <!-- Newly added -->
-                    <td>{{ case.get_stage_of_case_display }}</td> <!-- Newly added -->
+                    <td>{{ case.previous_case_number }}</td>
+                    <td>{{ case.assault_type }}</td>
+                    <td>{{ case.assigned_to }}</td>
+                    <td>{{ case.date_of_case_reporting|date:"M d, Y" }}</td>
+                    <td>{{ case.gender_site_code_of_reporting }}</td>
+                    <td>{{ case.stage_of_case_in_court }}</td>
                     <td>
                         <a href="{% url 'case_detail' case.pk %}" class="btn btn-info btn-sm">View</a>
                         <a href="{% url 'case_update' case.pk %}" class="btn btn-warning btn-sm">Edit</a>
@@ -38,7 +40,7 @@
                 </tr>
             {% empty %}
                 <tr>
-                    <td colspan="6" class="text-center">No cases available.</td>
+                    <td colspan="7" class="text-center">No cases found.</td>
                 </tr>
             {% endfor %}
         </tbody>
