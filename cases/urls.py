@@ -22,5 +22,7 @@ urlpatterns = [
     path('case/<int:case_id>/pdf/', generate_case_pdf, name='case_pdf'),
     path('case_analysis/', case_analysis, name='case_analysis'),
     path('cases/upcoming/', upcoming_cases_by_county, name='upcoming_cases_by_county'),
+
+    path('cases/dashboard/', views.case_dashboard, name='all_cases_dashboard')
     
 ]

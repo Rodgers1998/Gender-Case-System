@@ -11,7 +11,7 @@
     <!-- Styles -->
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link rel="icon" href="{% static 'images/shofco.png' %}">
+    <link rel="icon" href="{% static 'icons/icon-192x192.png' %}">
     <link rel="manifest" href="/static/manifest.json">
     <meta name="theme-color" content="#000000">
 
@@ -74,7 +74,8 @@
                     <li class="nav-item"><a class="nav-link" href="{% url 'case_create' %}">➕ Add New Case</a></li>
                     <li class="nav-item"><a class="nav-link" href="{% url 'case_list' %}">📋 All Cases</a></li>
                     <li class="nav-item"><a class="nav-link" href="{% url 'upcoming_cases_by_county' %}">📅 Upcoming Court Cases</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{% url 'case_analysis' %}">📊 Case Analysis</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'case_analysis' %}">📊 Court Case Analysis</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'all_cases_dashboard' %}">📈 All Cases Dashboard</a></li>
                 </ul>
                 {% endif %}
 
