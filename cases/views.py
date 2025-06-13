@@ -9,12 +9,10 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.units import inch
 from reportlab.lib import colors
-import os
 from datetime import date
-
-from django.db.models import Count
 from django.db.models.functions import TruncMonth
-from .models import Case
+from collections import defaultdict
+import os, json
 
 from .models import Case
 from .forms import CaseForm, UserRegistrationForm
@@ -36,21 +34,20 @@ def custom_logout(request):
     return render(request, 'cases/logout.html')
 
 
-from django.shortcuts import render
-from django.contrib.auth.decorators import login_required
-from django.db.models import Q
-from datetime import date
-from .models import Case
-
 @login_required
 def home(request):
     query = request.GET.get('q')
     today = date.today()
 
+    # Only show court cases
+    filter_base = {
+        'is_the_case_proceeding_to_court': True,
+        'date_of_court_followup__gte': today
+    }
     if request.user.is_superuser:
-        upcoming_cases = Case.objects.filter(date_of_court_followup__gte=today).order_by('date_of_court_followup')
+        upcoming_cases = Case.objects.filter(**filter_base).order_by('date_of_court_followup')
     else:
-        upcoming_cases = Case.objects.filter(user=request.user, date_of_court_followup__gte=today).order_by('date_of_court_followup')
+        upcoming_cases = Case.objects.filter(user=request.user, **filter_base).order_by('date_of_court_followup')
 
     if query:
         upcoming_cases = upcoming_cases.filter(
@@ -62,26 +59,16 @@ def home(request):
         )
 
     upcoming_cases = upcoming_cases[:10]
-
-    # Additional metrics
     female_count = Case.objects.filter(survivor_gender__iexact='female').count()
     male_count = Case.objects.filter(survivor_gender__iexact='male').count()
 
-    context = {
+    return render(request, 'cases/home.html', {
         'upcoming_cases': upcoming_cases,
         'female_count': female_count,
         'male_count': male_count,
         'today': today,
-    }
+    })
 
-    return render(request, 'cases/home.html', context)
-
-
-
-from django.db.models import Q, Count
-from django.shortcuts import render
-from django.contrib.auth.decorators import login_required
-from .models import Case
 
 @login_required
 def case_list(request):
@@ -89,10 +76,9 @@ def case_list(request):
     county = request.GET.get('county')
     status = request.GET.get('status')
 
-    # Base queryset
+    # All cases including non-court
     cases = Case.objects.all() if request.user.is_superuser else Case.objects.filter(user=request.user)
 
-    # Filtering
     if query:
         cases = cases.filter(
             Q(previous_case_number__icontains=query) |
@@ -106,26 +92,20 @@ def case_list(request):
     elif status == 'in_court':
         cases = cases.filter(case_still_in_court=True)
 
-    # Metrics
-    total = cases.count()
-    closed = cases.filter(case_is_closed=True).count()
-    in_court = cases.filter(case_still_in_court=True).count()
-    female = cases.filter(survivor_gender__iexact='female').count()
+    metrics = {
+        'total': cases.count(),
+        'closed': cases.filter(case_is_closed=True).count(),
+        'in_court': cases.filter(case_still_in_court=True).count(),
+        'female': cases.filter(survivor_gender__iexact='female').count(),
+    }
 
-    # Unique counties for filter dropdown
     counties = Case.objects.values_list('county', flat=True).distinct().order_by('county')
 
     return render(request, 'cases/case_list.html', {
         'cases': cases,
         'counties': counties,
-        'metrics': {
-            'total': total,
-            'closed': closed,
-            'in_court': in_court,
-            'female': female
-        }
+        'metrics': metrics
     })
-
 
 
 @login_required
@@ -170,60 +150,47 @@ def case_delete(request, pk):
     return render(request, 'cases/case_confirm_delete.html', {'case': case})
 
 
-# views.py
-
-from django.shortcuts import render
-from django.contrib.auth.decorators import login_required
-from django.db.models import Count
-from django.db.models.functions import TruncMonth
-from datetime import date
-from .models import Case
-import json
-from collections import defaultdict
-
 @login_required
 def case_analysis(request):
-    total = Case.objects.count()
-    closed = Case.objects.filter(case_is_closed=True).count()
-    in_court = Case.objects.filter(case_still_in_court=True).count()
-    female = Case.objects.filter(survivor_gender__iexact='female').count()
-    male = Case.objects.filter(survivor_gender__iexact='male').count()
+    base_qs = Case.objects.filter(is_the_case_proceeding_to_court=True)
 
-    gender_data = {
-        'labels': ['Female', 'Male'],
-        'data': [female, male]
-    }
+    total = base_qs.count()
+    closed = base_qs.filter(case_is_closed=True).count()
+    in_court = base_qs.filter(case_still_in_court=True).count()
+    female = base_qs.filter(survivor_gender__iexact='female').count()
+    male = base_qs.filter(survivor_gender__iexact='male').count()
 
-    county_queryset = Case.objects.values('county').annotate(total=Count('id')).order_by('-total')
+    gender_data = {'labels': ['Female', 'Male'], 'data': [female, male]}
+
+    county_qs = base_qs.values('county').annotate(total=Count('id')).order_by('-total')
     county_data = {
-        'labels': [entry['county'] or 'Unknown' for entry in county_queryset],
-        'data': [entry['total'] for entry in county_queryset]
+        'labels': [entry['county'] or 'Unknown' for entry in county_qs],
+        'data': [entry['total'] for entry in county_qs]
     }
 
-    subcounty_queryset = Case.objects.values('county', 'case_constituency_name').annotate(total=Count('id')).order_by('-total')
+    subcounty_qs = base_qs.values('county', 'case_constituency_name').annotate(total=Count('id')).order_by('county')
     subcounty_data = defaultdict(list)
-    for entry in subcounty_queryset:
+    for entry in subcounty_qs:
         subcounty_data[entry['county'] or 'Unknown'].append({
             'subcounty': entry['case_constituency_name'] or 'Unknown',
             'total': entry['total']
         })
 
-    time_series_queryset = (
-        Case.objects.annotate(month=TruncMonth('date_of_case_reporting'))
+    monthly_qs = (
+        base_qs.annotate(month=TruncMonth('date_of_case_reporting'))
         .values('month')
         .annotate(count=Count('id'))
         .order_by('month')
     )
     time_series = {
-        'labels': [entry['month'].strftime('%b %Y') for entry in time_series_queryset if entry['month']],
-        'data': [entry['count'] for entry in time_series_queryset if entry['month']]
+        'labels': [entry['month'].strftime('%b %Y') for entry in monthly_qs if entry['month']],
+        'data': [entry['count'] for entry in monthly_qs if entry['month']]
     }
 
-    assault_queryset = Case.objects.values('county', 'assault_type').annotate(total=Count('id'))
+    assault_qs = base_qs.values('county', 'assault_type').annotate(total=Count('id'))
     assault_data = defaultdict(lambda: defaultdict(int))
     assault_types = set()
-
-    for entry in assault_queryset:
+    for entry in assault_qs:
         county = entry['county'] or 'Unknown'
         assault = entry['assault_type'] or 'Unknown'
         assault_data[assault][county] += entry['total']
@@ -236,18 +203,13 @@ def case_analysis(request):
             {
                 'label': assault,
                 'data': [assault_data[assault].get(county, 0) for county in counties]
-            } for assault in sorted(assault_types)
+            }
+            for assault in sorted(assault_types)
         ]
     }
 
     context = {
-        'kpis': {
-            'total': total,
-            'closed': closed,
-            'in_court': in_court,
-            'female': female,
-            'male': male,
-        },
+        'kpis': {'total': total, 'closed': closed, 'in_court': in_court, 'female': female, 'male': male},
         'gender_data_json': json.dumps(gender_data),
         'county_data_json': json.dumps(county_data),
         'subcounty_data_json': json.dumps({k: v for k, v in subcounty_data.items()}),
@@ -258,35 +220,33 @@ def case_analysis(request):
     return render(request, 'cases/case_analysis.html', context)
 
 
-
-
-
 @login_required
 def upcoming_cases_by_county(request):
-    # Step 1: Get counties with upcoming cases, annotated by their soonest court date
-    counties_with_soonest_dates = (
+    counties_with_upcoming = (
         Case.objects
-        .filter(date_of_court_followup__gte=date.today())
+        .filter(is_the_case_proceeding_to_court=True, date_of_court_followup__gte=date.today())
         .exclude(county__isnull=True)
         .values('county')
         .annotate(soonest_date=Min('date_of_court_followup'))
-        .order_by('soonest_date')  # Sort counties by their earliest court date
+        .order_by('soonest_date')
     )
 
-    # Step 2: For each county, fetch up to 5 upcoming cases
     cases_by_county = {}
-    for entry in counties_with_soonest_dates:
+    for entry in counties_with_upcoming:
         county = entry['county']
         cases = (
             Case.objects
-            .filter(county=county, date_of_court_followup__gte=date.today())
+            .filter(
+                is_the_case_proceeding_to_court=True,
+                county=county,
+                date_of_court_followup__gte=date.today()
+            )
             .order_by('date_of_court_followup')[:5]
         )
         cases_by_county[county] = cases
 
-    return render(request, 'cases/upcoming_cases_by_county.html', {
-        'cases_by_county': cases_by_county
-    })
+    return render(request, 'cases/upcoming_cases_by_county.html', {'cases_by_county': cases_by_county})
+
 
 @login_required
 def generate_case_pdf(request, case_id):
@@ -322,7 +282,6 @@ def generate_case_pdf(request, case_id):
         p.drawString(border_margin + 160, y_position, str(value) if value else "N/A")
         y_position -= line_height
 
-    # Draw fields selectively for brevity (or loop through model._meta.fields for full automation)
     draw_detail("Case ID", case.case_id)
     draw_detail("Assigned To", case.assigned_to)
     draw_detail("Previous Case No.", case.previous_case_number)
@@ -345,3 +304,116 @@ def generate_case_pdf(request, case_id):
     p.showPage()
     p.save()
     return response
+
+
+@login_required
+def case_dashboard(request):
+    from collections import defaultdict
+    import json
+    from django.db.models import Count
+    from django.db.models.functions import TruncMonth
+
+    all_cases = Case.objects.all()
+    total = all_cases.count()
+    closed = all_cases.filter(case_is_closed=True).count()
+    in_court = all_cases.filter(case_still_in_court=True).count()
+    female = all_cases.filter(survivor_gender__iexact='female').count()
+    male = all_cases.filter(survivor_gender__iexact='male').count()
+
+    # KPIs
+    kpis = {
+        'total': total, 'closed': closed,
+        'in_court': in_court, 'female': female, 'male': male
+    }
+
+    # Gender Pie
+    gender_data = {'labels': ['Female', 'Male'], 'data': [female, male]}
+
+    # Age Group
+    age_group = all_cases.values('age_group').annotate(total=Count('id')).order_by('-total')
+    age_group_data = {
+        'labels': [a['age_group'] or 'Unknown' for a in age_group],
+        'data': [a['total'] for a in age_group]
+    }
+
+    # Referral Pie
+    referral_map = {
+        'Medical': 'referred_for_medical_intervention',
+        'Police': 'referred_to_police',
+        'Counseling': 'referred_to_counseling_and_support',
+        'Safe House': 'referred_to_safe_house',
+        'DCO': 'referred_to_dco'
+    }
+    referral_data = {
+        'labels': list(referral_map.keys()),
+        'data': [all_cases.filter(**{field: True}).count() for field in referral_map.values()]
+    }
+
+    # County/Subcounty
+    county_data = all_cases.values('county').annotate(total=Count('id')).order_by('-total')
+    county_data_json = {
+        'labels': [entry['county'] or 'Unknown' for entry in county_data],
+        'data': [entry['total'] for entry in county_data]
+    }
+
+    subcounty_data = all_cases.values('case_constituency_name').annotate(total=Count('id')).order_by('-total')
+    subcounty_data_json = {
+        'labels': [entry['case_constituency_name'] or 'Unknown' for entry in subcounty_data],
+        'data': [entry['total'] for entry in subcounty_data]
+    }
+
+    # Monthly
+    time_series = all_cases.annotate(month=TruncMonth('date_of_case_reporting')).values('month').annotate(count=Count('id')).order_by('month')
+    time_series_json = {
+        'labels': [entry['month'].strftime('%b %Y') for entry in time_series if entry['month']],
+        'data': [entry['count'] for entry in time_series if entry['month']]
+    }
+
+    # Assault by County (Stacked)
+    assault_raw = all_cases.values('county', 'assault_type').annotate(total=Count('id'))
+    assault_data = defaultdict(lambda: defaultdict(int))
+    assault_types = set()
+
+    for entry in assault_raw:
+        county = entry['county'] or 'Unknown'
+        assault = entry['assault_type'] or 'Unknown'
+        assault_data[assault][county] += entry['total']
+        assault_types.add(assault)
+
+    counties = sorted({c for counts in assault_data.values() for c in counts})
+    assault_stacked = {
+        'labels': counties,
+        'datasets': [
+            {
+                'label': assault,
+                'data': [assault_data[assault].get(c, 0) for c in counties]
+            } for assault in sorted(assault_types)
+        ]
+    }
+
+    # Referral by County (Stacked)
+    referral_stacked = {
+        'labels': counties,
+        'datasets': [
+            {
+                'label': label,
+                'data': [
+                    all_cases.filter(county=c, **{field: True}).count() for c in counties
+                ]
+            } for label, field in referral_map.items()
+        ]
+    }
+
+    context = {
+        'kpis': kpis,
+        'gender_data': gender_data,
+        'age_group_data': age_group_data,
+        'referral_data': referral_data,
+        'county_data': county_data_json,
+        'subcounty_data': subcounty_data_json,
+        'time_series': time_series_json,
+        'assault_stacked': assault_stacked,
+        'referral_stacked': referral_stacked,
+    }
+    return render(request, 'cases/all_cases_dashboard.html', context)
+

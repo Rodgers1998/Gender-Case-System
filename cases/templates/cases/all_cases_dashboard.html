@@ -1,0 +1,175 @@
+{% extends 'base.html' %}
+{% block title %}All Cases Dashboard{% endblock %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <h2 class="mb-4 text-center">All Reported Cases Dashboard</h2>
+
+    <!-- KPIs -->
+    <div class="row text-center mb-4">
+        {% for label, value in kpis.items %}
+        <div class="col-md-2 mb-2">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">{{ label|title }}</h5>
+                    <h3 class="text-primary">{{ value }}</h3>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Row 1: Gender, Age Group, Referral Pie -->
+    <div class="row">
+        <div class="col-md-4 mb-5">
+            <canvas id="genderChart" height="300"></canvas>
+        </div>
+        <div class="col-md-4 mb-5">
+            <canvas id="ageGroupChart" height="300"></canvas>
+        </div>
+        <div class="col-md-4 mb-5">
+            <canvas id="referralChart" height="300"></canvas>
+        </div>
+    </div>
+
+    <!-- Row 2: County Bar, Subcounty Bar -->
+    <div class="row">
+        <div class="col-md-6 mb-5">
+            <canvas id="countyChart" height="500"></canvas>
+        </div>
+        <div class="col-md-6 mb-5">
+            <canvas id="subcountyChart" height="500"></canvas>
+        </div>
+    </div>
+
+    <!-- Row 3: Monthly Time Series -->
+    <div class="row">
+        <div class="col-md-12 mb-5">
+            <canvas id="monthlyChart" height="500"></canvas>
+        </div>
+    </div>
+
+    <!-- Row 4: Assault Type Stack, Referral Type Stack -->
+    <div class="row">
+        <div class="col-md-6 mb-5">
+            <canvas id="assaultStackedChart" height="600"></canvas>
+        </div>
+        <div class="col-md-6 mb-5">
+            <canvas id="referralStackedChart" height="600"></canvas>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    function renderPie(id, labels, data, label) {
+        new Chart(document.getElementById(id), {
+            type: 'pie',
+            data: {
+                labels: labels,
+                datasets: [{ data: data, backgroundColor: ['#007bff', '#dc3545', '#ffc107', '#28a745'] }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: label
+                    },
+                    legend: { position: 'bottom' }
+                }
+            }
+        });
+    }
+
+    function renderBar(id, labels, data, label) {
+        new Chart(document.getElementById(id), {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{ label: label, data: data, backgroundColor: '#17a2b8' }]
+            },
+            options: {
+                responsive: true,
+                indexAxis: 'x',
+                maintainAspectRatio: false,
+                scales: {
+                    y: { beginAtZero: true }
+                },
+                plugins: {
+                    legend: { display: false },
+                    title: { display: true, text: label }
+                }
+            }
+        });
+    }
+
+    function renderStackedBar(id, labels, datasets, title) {
+        new Chart(document.getElementById(id), {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: datasets
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: title
+                    },
+                    legend: {
+                        position: 'bottom'
+                    }
+                },
+                scales: {
+                    x: { stacked: true },
+                    y: { stacked: true, beginAtZero: true }
+                }
+            }
+        });
+    }
+
+    function renderLine(id, labels, data, label) {
+        new Chart(document.getElementById(id), {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: label,
+                    data: data,
+                    fill: false,
+                    borderColor: '#6610f2',
+                    backgroundColor: '#ddd',
+                    tension: 0.3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: label
+                    }
+                }
+            }
+        });
+    }
+
+    // Render Charts using JSON context
+    renderPie('genderChart', {{ gender_data.labels|safe }}, {{ gender_data.data|safe }}, 'Gender Distribution');
+    renderPie('ageGroupChart', {{ age_group_data.labels|safe }}, {{ age_group_data.data|safe }}, 'Age Groups');
+    renderPie('referralChart', {{ referral_data.labels|safe }}, {{ referral_data.data|safe }}, 'Referral Breakdown');
+
+    renderBar('countyChart', {{ county_data.labels|safe }}, {{ county_data.data|safe }}, 'Cases by County');
+    renderBar('subcountyChart', {{ subcounty_data.labels|safe }}, {{ subcounty_data.data|safe }}, 'Cases by Subcounty');
+
+    renderLine('monthlyChart', {{ time_series.labels|safe }}, {{ time_series.data|safe }}, 'Monthly Reports');
+
+    renderStackedBar('assaultStackedChart', {{ assault_stacked.labels|safe }}, {{ assault_stacked.datasets|safe }}, 'Assault Types by County');
+    renderStackedBar('referralStackedChart', {{ referral_stacked.labels|safe }}, {{ referral_stacked.datasets|safe }}, 'Referrals by County');
+</script>
+{% endblock %}
