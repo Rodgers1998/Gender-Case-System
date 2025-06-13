@@ -78,26 +78,54 @@ def home(request):
 
 
 
+from django.db.models import Q, Count
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from .models import Case
+
 @login_required
 def case_list(request):
     query = request.GET.get('q')
-    if request.user.is_superuser:
-        all_cases = Case.objects.all().order_by('-date_of_case_reporting')
-    else:
-        all_cases = Case.objects.filter(user=request.user).order_by('-date_of_case_reporting')
+    county = request.GET.get('county')
+    status = request.GET.get('status')
 
+    # Base queryset
+    cases = Case.objects.all() if request.user.is_superuser else Case.objects.filter(user=request.user)
+
+    # Filtering
     if query:
-        all_cases = all_cases.filter(
+        cases = cases.filter(
             Q(previous_case_number__icontains=query) |
             Q(assault_type__icontains=query) |
-            Q(stage_of_case_in_court__icontains=query) |
-            Q(site__icontains=query)
+            Q(stage_of_case_in_court__icontains=query)
         )
+    if county:
+        cases = cases.filter(county__iexact=county)
+    if status == 'closed':
+        cases = cases.filter(case_is_closed=True)
+    elif status == 'in_court':
+        cases = cases.filter(case_still_in_court=True)
 
-    paginator = Paginator(all_cases, 10)
-    page_number = request.GET.get('page')
-    cases = paginator.get_page(page_number)
-    return render(request, 'cases/case_list.html', {'cases': cases})
+    # Metrics
+    total = cases.count()
+    closed = cases.filter(case_is_closed=True).count()
+    in_court = cases.filter(case_still_in_court=True).count()
+    female = cases.filter(survivor_gender__iexact='female').count()
+
+    # Unique counties for filter dropdown
+    counties = Case.objects.values_list('county', flat=True).distinct().order_by('county')
+
+    return render(request, 'cases/case_list.html', {
+        'cases': cases,
+        'counties': counties,
+        'metrics': {
+            'total': total,
+            'closed': closed,
+            'in_court': in_court,
+            'female': female
+        }
+    })
+
 
 
 @login_required

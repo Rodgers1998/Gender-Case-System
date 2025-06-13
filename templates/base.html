@@ -7,11 +7,42 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Gender Case Management{% endblock %}</title>
+
+    <!-- Styles -->
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="icon" href="{% static 'images/shofco.png' %}">
     <link rel="manifest" href="/static/manifest.json">
     <meta name="theme-color" content="#000000">
-    <link rel="icon" href="/static/icons/icon-192x192.png">
+
+    <style>
+        .navbar-custom {
+            background-color: #003366;
+        }
+        .navbar-custom .navbar-brand,
+        .navbar-custom .nav-link,
+        .navbar-custom .btn {
+            color: white !important;
+        }
+        .navbar-custom .btn:hover {
+            background-color: #0059b3;
+            color: white !important;
+        }
+        .dashboard-image {
+            height: 40px;
+        }
+        body.dark-mode {
+            background-color: #121212;
+            color: #e0e0e0;
+        }
+        .dark-mode .navbar-custom {
+            background-color: #1e1e1e;
+        }
+        .dark-mode .card {
+            background-color: #2c2c2c;
+            border-color: #444;
+        }
+    </style>
 
     <!-- Register Service Worker -->
     <script>
@@ -26,74 +57,73 @@
         }
     </script>
 </head>
-<body>
+<body{% if request.COOKIES.dark_mode == 'true' %} class="dark-mode"{% endif %}>
     <header>
-        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <nav class="navbar navbar-expand-lg navbar-custom">
             <a href="{% url 'home' %}" class="navbar-brand">
                 <img src="{% static 'images/shofco.png' %}" alt="Dashboard" class="dashboard-image">
             </a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
-                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
+
             <div class="collapse navbar-collapse" id="navbarNav">
+                {% if user.is_authenticated %}
                 <ul class="navbar-nav mr-auto">
-                    <!-- Other navigation items here if needed -->
+                    <li class="nav-item"><a class="nav-link" href="{% url 'case_create' %}">➕ Add New Case</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'case_list' %}">📋 All Cases</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'upcoming_cases_by_county' %}">📅 Upcoming Court Cases</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'case_analysis' %}">📊 Case Analysis</a></li>
                 </ul>
+                {% endif %}
+
                 <ul class="navbar-nav">
                     {% if user.is_authenticated %}
                         <li class="nav-item">
-                            <a class="nav-link" href="#">{{ user.username }}</a>
+                            <span class="nav-link font-weight-bold text-white">{{ user.username }}</span>
                         </li>
                         <li class="nav-item">
                             <form method="post" action="{% url 'logout' %}" style="display:inline;">
                                 {% csrf_token %}
-                                <button type="submit" class="btn btn-link nav-link" style="padding: 0;">Logout</button>
+                                <button type="submit" class="btn btn-link nav-link text-white" style="padding: 0;">Logout</button>
                             </form>
                         </li>
                     {% else %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'login' %}">Login</a>
+                            <a class="nav-link text-white" href="{% url 'login' %}">Login</a>
                         </li>
                     {% endif %}
-                    <!-- Install App button will be injected here by JS -->
                 </ul>
             </div>
         </nav>
     </header>
 
-    <main>
+    <main class="container mt-4">
         {% block content %}
-        {% if user.is_authenticated %}
-            <div class="alert alert-success text-center">
-                Welcome, {{ user.username }}!
-            </div>
-        {% endif %}
+            {% if user.is_authenticated %}
+                <div class="alert alert-success text-center">Welcome, {{ user.username }}!</div>
+            {% endif %}
         {% endblock %}
     </main>
 
     <!-- Install App Button Script -->
     <script>
         let deferredPrompt;
-
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
 
-            // Create the "Install App" button with Bootstrap styling
             const installButton = document.createElement('button');
             installButton.textContent = 'Install App';
-            installButton.className = 'btn btn-outline-primary ml-2';
+            installButton.className = 'btn btn-outline-light ml-3';
 
-            // Append it to the navbar (right side)
             const navbarRight = document.querySelector('.navbar-nav:last-child');
             if (navbarRight) {
                 const installItem = document.createElement('li');
                 installItem.className = 'nav-item';
                 installItem.appendChild(installButton);
                 navbarRight.appendChild(installItem);
-            } else {
-                document.body.appendChild(installButton);
             }
 
             installButton.addEventListener('click', () => {
@@ -111,7 +141,7 @@
         });
     </script>
 
-    <!-- Bootstrap JS & dependencies -->
+    <!-- Bootstrap Dependencies -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
