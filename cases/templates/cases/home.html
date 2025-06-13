@@ -6,6 +6,17 @@
 {% block content %}
 <div class="container mt-4">
 
+  <!-- Dynamic welcome and county count -->
+  {% if user.is_authenticated %}
+    <div class="alert alert-info text-center">
+      {% if user.is_superuser %}
+        The system currently covers <strong>{{ county_count }}</strong> unique county{{ county_count|pluralize }}.
+      {% else %}
+        You are assigned cases in <strong>{{ county_count }}</strong> county{{ county_count|pluralize }}.
+      {% endif %}
+    </div>
+  {% endif %}
+
   <!-- KPI Cards -->
   <div class="row mb-4 text-center">
     <div class="col-md-3 mb-3">
@@ -36,7 +47,7 @@
       <div class="card border-warning shadow">
         <div class="card-body">
           <h6 class="text-muted">Counties Involved</h6>
-          <h3 class="text-warning">{{ upcoming_cases|dictsort:"county"|length }}</h3>
+          <h3 class="text-warning">{{ county_count }}</h3>
         </div>
       </div>
     </div>

@@ -39,15 +39,22 @@ def home(request):
     query = request.GET.get('q')
     today = date.today()
 
-    # Only show court cases
     filter_base = {
         'is_the_case_proceeding_to_court': True,
         'date_of_court_followup__gte': today
     }
+
     if request.user.is_superuser:
         upcoming_cases = Case.objects.filter(**filter_base).order_by('date_of_court_followup')
+        county_count = Case.objects.filter(
+            is_the_case_proceeding_to_court=True
+        ).exclude(county__isnull=True).exclude(county__exact='').values('county').distinct().count()
     else:
         upcoming_cases = Case.objects.filter(user=request.user, **filter_base).order_by('date_of_court_followup')
+        county_count = Case.objects.filter(
+            user=request.user,
+            is_the_case_proceeding_to_court=True
+        ).exclude(county__isnull=True).exclude(county__exact='').values('county').distinct().count()
 
     if query:
         upcoming_cases = upcoming_cases.filter(
@@ -66,6 +73,7 @@ def home(request):
         'upcoming_cases': upcoming_cases,
         'female_count': female_count,
         'male_count': male_count,
+        'county_count': county_count,
         'today': today,
     })
 
