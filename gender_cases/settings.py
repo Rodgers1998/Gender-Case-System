@@ -93,19 +93,19 @@ WSGI_APPLICATION = 'gender_cases.wsgi.application'
 #     }
 # }
 
-import dj_database_url
-import os
-
-DATABASES = {
-    'default': dj_database_url.config(default=os.getenv("DATABASE_URL"))
-}
-
-
 # import dj_database_url
+# import os
 
 # DATABASES = {
-#     'default': dj_database_url.config(default='postgres://localhost/mydb')
+#     'default': dj_database_url.config(default=os.getenv("DATABASE_URL"))
 # }
+
+
+import dj_database_url
+
+DATABASES = {
+    'default': dj_database_url.config(default='postgres://localhost/mydb')
+}
 
 # DATABASES = {
 #     'default': dj_database_url.config(conn_max_age=600, ssl_require=True)
