@@ -2,70 +2,94 @@
 {% load crispy_forms_tags %}
 
 {% block content %}
-<div class="container mt-5">
-    <h2 class="mb-4">Create or Update Case</h2>
-    <form method="POST" class="form-horizontal">
-        {% csrf_token %}
+<div class="container mt-5 mb-5">
+    <div class="card shadow-lg p-4 rounded-4">
+        <h2 class="mb-4 text-center text-primary">📝 Create or Update Case</h2>
 
-        <!-- Render all fields dynamically -->
-        {% for field in form %}
-            {% if field.name != 'sentence_duration' and field.name != 'jail_duration' %}
-                <div class="form-group">
-                    {{ field.label_tag }} {{ field }}
-                    {% if field.help_text %}
-                        <small class="form-text text-muted">{{ field.help_text }}</small>
-                    {% endif %}
-                </div>
-            {% endif %}
-        {% endfor %}
+        <form method="POST" class="form-horizontal">
+            {% csrf_token %}
 
-        <!-- Sentence Duration (shown only if "sentencing" is selected) -->
-        <div id="sentence-duration-field" class="form-group" style="display: none;">
-            <label for="id_sentence_duration">Sentencing Duration (e.g., "2 years"):</label>
-            <input type="text" name="sentence_duration" id="id_sentence_duration" class="form-control" placeholder="Enter duration">
-        </div>
+            <div class="row">
+                {% for field in form %}
+                    <div class="col-md-6 mb-3">
+                        <label for="{{ field.id_for_label }}" class="form-label fw-semibold">
+                            {{ field.label }}
+                        </label>
+                        {{ field }}
 
-        <!-- Jail Duration (shown only if "jailing" is selected) -->
-        <div id="jail-duration-field" class="form-group" style="display: none;">
-            <label for="id_jail_duration">Jailing Duration (e.g., "2 years"):</label>
-            <input type="text" name="jail_duration" id="id_jail_duration" class="form-control" placeholder="Enter duration">
-        </div>
+                        {% if field.help_text %}
+                            <small class="form-text text-muted">{{ field.help_text }}</small>
+                        {% endif %}
 
-        <button type="submit" class="btn btn-success mt-3">Save Case</button>
-    </form>
+                        {% for error in field.errors %}
+                            <div class="text-danger small">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+            </div>
+
+            <!-- Dynamic fields for sentence and jail duration -->
+            <div id="sentence-duration-field" class="form-group" style="display: none;">
+                <label for="id_sentence_duration" class="form-label">Sentencing Duration:</label>
+                <input type="text" name="sentence_duration" id="id_sentence_duration" class="form-control"
+                    placeholder="e.g., 2 years">
+            </div>
+
+            <div id="jail-duration-field" class="form-group" style="display: none;">
+                <label for="id_jail_duration" class="form-label">Jailing Duration:</label>
+                <input type="text" name="jail_duration" id="id_jail_duration" class="form-control"
+                    placeholder="e.g., 1 year 6 months">
+            </div>
+
+            <!-- Action buttons -->
+            <div class="d-flex justify-content-center gap-3 mt-4">
+                <button type="submit" class="btn btn-success px-4 py-2 rounded-pill shadow">
+                    💾 Save Case
+                </button>
+
+                <a href="{% url 'case_list' %}" class="btn btn-secondary px-4 py-2 rounded-pill shadow">
+                    ⬅ Back to Cases
+                </a>
+            </div>
+        </form>
+    </div>
 </div>
 
+<!-- jQuery and custom JS -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
+    // Show/hide sentencing or jailing duration fields
     function toggleDurationFields() {
-        const stage = $('#id_stage_of_case').val();
+        const stage = $('#id_stage_of_case_in_court').val();
         $('#sentence-duration-field').toggle(stage === 'sentencing');
         $('#jail-duration-field').toggle(stage === 'jailing');
     }
 
-    toggleDurationFields();
-    $('#id_stage_of_case').change(toggleDurationFields);
+    $(document).ready(function () {
+        toggleDurationFields();
+        $('#id_stage_of_case_in_court').change(toggleDurationFields);
 
-    // Dynamic sub-county dropdown
-    const subCountyData = {
-        'mombasa': ['Changamwe', 'Jomvu', 'Kisauni', 'Likoni', 'Mvita', 'Nyali'],
-        'kwale': ['Matuga', 'Msambweni', 'Lunga Lunga', 'Kinango'],
-        'kilifi': ['Kilifi North', 'Kilifi South', 'Malindi', 'Magarini', 'Rabai', 'Kaloleni', 'Ganze'],
-        'tana river': ['Bura', 'Galole', 'Garsen'],
-        'lamu': ['Lamu East', 'Lamu West'],
-        'taita-taveta': ['Mwatate', 'Voi', 'Taveta', 'Wundanyi']
-    };
+        // Dynamic sub-county dropdowns
+        const subCountyData = {
+            'mombasa': ['Changamwe', 'Jomvu', 'Kisauni', 'Likoni', 'Mvita', 'Nyali'],
+            'kwale': ['Matuga', 'Msambweni', 'Lunga Lunga', 'Kinango'],
+            'kilifi': ['Kilifi North', 'Kilifi South', 'Malindi', 'Magarini', 'Rabai', 'Kaloleni', 'Ganze'],
+            'tana river': ['Bura', 'Galole', 'Garsen'],
+            'lamu': ['Lamu East', 'Lamu West'],
+            'taita-taveta': ['Mwatate', 'Voi', 'Taveta', 'Wundanyi']
+        };
 
-    $('#id_county').change(function () {
-        const county = $(this).val();
-        const subCounty = $('#id_sub_county');
-        subCounty.empty().append('<option value="">Select a sub-county</option>');
+        $('#id_county').change(function () {
+            const county = $(this).val();
+            const subCounty = $('#id_case_constituency_name');
+            subCounty.empty().append('<option value="">Select a sub-county</option>');
 
-        if (subCountyData[county]) {
-            subCountyData[county].forEach(sc => {
-                subCounty.append('<option value="' + sc.toLowerCase().replace(/ /g, '_') + '">' + sc + '</option>');
-            });
-        }
+            if (subCountyData[county]) {
+                subCountyData[county].forEach(sc => {
+                    subCounty.append('<option value="' + sc + '">' + sc + '</option>');
+                });
+            }
+        });
     });
 </script>
 {% endblock %}
