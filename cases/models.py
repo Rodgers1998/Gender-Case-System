@@ -8,11 +8,21 @@ class Case(models.Model):
     assigned_to = models.CharField(max_length=150, null=True, blank=True)
     previous_case_number = models.CharField(max_length=100, null=True, blank=True)
 
+    case_number = models.CharField(max_length=100, null=True, blank=True)
+    case_name = models.CharField(max_length=255, null=True, blank=True)
+    case_summary_notes = models.TextField(null=True, blank=True)
+
     date_of_case_reporting = models.DateField(null=True, blank=True)
     date_of_case_intake = models.DateField(null=True, blank=True)
     date_of_case_assignment = models.DateField(null=True, blank=True)
     date_of_case_closure = models.DateField(null=True, blank=True)
     date_modified = models.DateTimeField(null=True, blank=True)
+    date_of_court_followup = models.DateField(null=True, blank=True)
+    date_of_safe_house_onboarding = models.DateField(null=True, blank=True)
+    date_of_safe_house_discharge = models.DateField(null=True, blank=True)
+
+    case_reporting_datekey = models.IntegerField(null=True, blank=True)
+    case_intake_datekey = models.IntegerField(null=True, blank=True)
 
     case_duration_in_days = models.IntegerField(null=True, blank=True)
     days_since_intake = models.IntegerField(null=True, blank=True)
@@ -31,21 +41,25 @@ class Case(models.Model):
     referred_for_medical_intervention = models.BooleanField(default=False)
     case_referred_to_location = models.TextField(null=True, blank=True)
 
+    case_reported_to_police = models.BooleanField(null=True, blank=True)
+    reported_by = models.CharField(max_length=100, null=True, blank=True)
+
+    parent_case_id = models.UUIDField(null=True, blank=True)
+    parent_case_type = models.CharField(max_length=100, null=True, blank=True)
+
     incident_report_village_name = models.CharField(max_length=100, null=True, blank=True)
     incident_report_ward_code = models.CharField(max_length=50, null=True, blank=True)
     incident_report_constituency_code = models.CharField(max_length=50, null=True, blank=True)
     incident_report_county_code = models.CharField(max_length=50, null=True, blank=True)
 
     case_is_closed = models.BooleanField(default=False)
+    closed = models.BooleanField(default=False)
     is_case_referred = models.BooleanField(default=False)
     is_the_case_proceeding_to_court = models.BooleanField(null=True, blank=True)
     case_still_in_court = models.BooleanField(null=True, blank=True)
-
-    date_of_court_followup = models.DateField(null=True, blank=True)
     stage_of_case_in_court = models.CharField(max_length=100, null=True, blank=True)
 
     medium_of_reporting = models.CharField(max_length=100, null=True, blank=True)
-
     survivor_gender = models.CharField(max_length=20, null=True, blank=True)
     survivor_age = models.IntegerField(null=True, blank=True)
     age_group = models.CharField(max_length=50, null=True, blank=True)
@@ -57,4 +71,4 @@ class Case(models.Model):
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self):
-        return str(self.case_id)
+        return f"{self.case_number or self.case_id}"
