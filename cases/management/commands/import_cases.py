@@ -1,14 +1,18 @@
 import json
+import re
 from django.core.management.base import BaseCommand
 from cases.models import Case
 from django.utils.dateparse import parse_date, parse_datetime
 from django.contrib.auth.models import User
 
+
 def safe_parse_date(value):
     return parse_date(value) if isinstance(value, str) and value.strip() else None
 
+
 def safe_parse_datetime(value):
     return parse_datetime(value) if isinstance(value, str) and value.strip() else None
+
 
 def parse_boolean(value):
     if isinstance(value, bool):
@@ -17,25 +21,40 @@ def parse_boolean(value):
         return value.lower() in ['yes', 'true', '1']
     return False
 
+
 class Command(BaseCommand):
-    help = "Import or update Case data from a JSON file"
+    help = "Import or update Mombasa Case data from a JSON file and create assigned users"
 
     def add_arguments(self, parser):
         parser.add_argument('--file', type=str, default='case_occurence.json', help='Path to the JSON file')
 
     def handle(self, *args, **options):
         file_path = options['file']
+
         try:
+            # 🧩 Step 1: Read raw text and fix invalid JSON escape characters
             with open(file_path, 'r', encoding='utf-8') as f:
-                data = json.load(f)
+                raw_data = f.read()
+
+            # Fix any single backslashes that break JSON parsing
+            # Example: "691\09\10\2025" → "691\\09\\10\\2025"
+            raw_data = re.sub(r'\\(?![\\/"bfnrtu])', r'\\\\', raw_data)
+
+            # Load cleaned JSON
+            data = json.loads(raw_data)
+
         except Exception as e:
             self.stderr.write(f"❌ Failed to read JSON: {e}")
             return
 
-        created, updated, skipped = 0, 0, 0
+        created, updated, skipped, user_created = 0, 0, 0, 0
 
         for entry in data:
             try:
+                # ✅ Only import cases where county is "mombasa"
+                if entry.get("incident_report_county_code", "").strip().lower() != "mombasa":
+                    continue
+
                 case_id = entry.get("case_id") or entry.get("id")
                 if not case_id:
                     skipped += 1
@@ -84,21 +103,31 @@ class Command(BaseCommand):
                     }
                 )
 
-                # Auto-link user if present
-                if entry.get("assigned_to"):
-                    username = entry["assigned_to"].strip().lower().replace(" ", "_")
-                    user, _ = User.objects.get_or_create(username=username, defaults={"password": "12345"})
-                    case_obj.user = user
-                    case_obj.save()
+                # ✅ Auto-create user if assigned_to exists
+                assigned_to = entry.get("assigned_to")
+                if assigned_to:
+                    username = assigned_to.strip().lower().replace(" ", "_")
+                    user, created_user = User.objects.get_or_create(username=username)
+                    if created_user:
+                        user.set_password("12345")
+                        user.save()
+                        user_created += 1
+
+                    # Link user to case if your model supports it
+                    if hasattr(case_obj, "user"):
+                        case_obj.user = user
+                        case_obj.save()
 
                 if is_created:
                     created += 1
                 else:
                     updated += 1
+
             except Exception as e:
                 skipped += 1
                 self.stderr.write(f"❌ Skipping entry due to error: {e}")
 
-        self.stdout.write(self.style.SUCCESS(f"✅ Created: {created}"))
-        self.stdout.write(self.style.SUCCESS(f"✅ Updated: {updated}"))
-        self.stdout.write(self.style.WARNING(f"⚠️ Skipped: {skipped}"))
+        self.stdout.write(self.style.SUCCESS(f"✅ Created cases: {created}"))
+        self.stdout.write(self.style.SUCCESS(f"✅ Updated cases: {updated}"))
+        self.stdout.write(self.style.SUCCESS(f"👤 New users created: {user_created}"))
+        self.stdout.write(self.style.WARNING(f"⚠️ Skipped entries: {skipped}"))
