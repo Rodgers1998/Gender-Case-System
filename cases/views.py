@@ -214,7 +214,6 @@ def generate_case_pdf(request, case_id):
         ("Referred to Medical", "Yes" if case.referred_for_medical_intervention else "No"),
         ("Referred to Safe House", "Yes" if case.referred_to_safe_house else "No"),
         ("Referred to Counseling", "Yes" if case.referred_to_counseling_and_support else "No"),
-        ("Remarks", case.case_remarks or "N/A"),
     ]
 
     for label, val in fields:
