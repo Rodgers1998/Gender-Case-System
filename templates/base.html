@@ -73,7 +73,10 @@
                 <ul class="navbar-nav mr-auto">
                     <li class="nav-item"><a class="nav-link" href="{% url 'case_create' %}">➕ Add New Case</a></li>
                     <li class="nav-item"><a class="nav-link" href="{% url 'case_list' %}">📋 All Cases</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{% url 'upcoming_cases_by_county' %}">📅 Upcoming Court Cases</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'upcoming_cases_by_county' %}">📅 Upcoming Cases by County</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'upcoming_cases_by_subcounty' %}">📅 Upcoming Cases by Subcounty</a></li>
+
+
                     <li class="nav-item"><a class="nav-link" href="{% url 'case_analysis' %}">📊 Court Case Analysis</a></li>
                     <li class="nav-item"><a class="nav-link" href="{% url 'all_cases_dashboard' %}">📈 All Cases Dashboard</a></li>
                 </ul>

@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+
+{% block title %}Upcoming Cases by Subcounty{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4 text-center">📅 Top 5 Upcoming Cases by Subcounty</h2>
+
+    <!-- Container for Subcounty Tables -->
+    <div class="row">
+        {% for subcounty, cases in cases_by_subcounty.items %}
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-header text-white" 
+                     style="background-color: {% cycle '#007bff' '#28a745' '#ffc107' '#17a2b8' '#fd7e14' '#6f42c1' %};">
+                    <strong>{{ subcounty }}</strong> — Top 5 Upcoming Cases
+                </div>
+                <div class="card-body p-0">
+                    <table class="table mb-0 table-hover table-striped">
+                        <thead class="thead-light">
+                            <tr>
+                                <th>Case Number</th>
+                                <th>Court Follow-up Date</th>
+                                <th>Details</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for case in cases %}
+                            <tr>
+                                <td>{{ case.previous_case_number|default:case.case_id }}</td>
+                                <td>{{ case.date_of_court_followup }}</td>
+                                <td>
+                                    <a href="{% url 'case_detail' case.pk %}" class="btn btn-sm btn-info">
+                                        View
+                                    </a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="3" class="text-center text-muted">No upcoming cases for this subcounty</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        {% if forloop.counter|divisibleby:2 %}
+        </div><div class="row">
+        {% endif %}
+        {% endfor %}
+    </div>
+</div>
+
+<style>
+    .card-header {
+        font-size: 1.1rem;
+    }
+    .table th, .table td {
+        vertical-align: middle;
+    }
+    .btn-info {
+        background-color: #007bff;
+        border: none;
+    }
+    .btn-info:hover {
+        background-color: #0056b3;
+    }
+</style>
+{% endblock %}

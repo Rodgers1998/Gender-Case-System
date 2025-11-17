@@ -79,6 +79,19 @@
                 <dd class="col-sm-8">{{ case.case_is_closed|yesno:"Yes,No" }}</dd>
             </dl>
 
+            <!-- QR Code and Verify Button -->
+            <div class="mt-4 d-flex align-items-center">
+                <div>
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data={{ verify_url }}" 
+                         alt="QR Code" class="img-thumbnail">
+                </div>
+                <div class="ms-3">
+                    <a href="{{ verify_url }}" target="_blank" class="btn btn-success btn-lg">
+                        Verify this Case
+                    </a>
+                </div>
+            </div>
+
             <div class="mt-4">
                 <a href="{% url 'case_update' case.pk %}" class="btn btn-warning btn-lg">Edit Case</a>
                 <a href="{% url 'case_delete' case.pk %}" class="btn btn-danger btn-lg">Delete Case</a>
