@@ -183,10 +183,10 @@ def generate_case_pdf(request, case_id):
     p.rect(border_margin, border_margin, width - 2 * border_margin, height - 2 * border_margin)
 
     # Logo
-    logo_path = os.path.join(settings.BASE_DIR, 'static', 'images', 'shofco.png')
-    if os.path.exists(logo_path):
-        p.drawImage(logo_path, width / 2 - inch, height - 100, width=2*inch, height=0.75*inch)
-
+    logo_path = os.path.join(settings.STATIC_ROOT, 'images/shofco.png') 
+    if os.path.exists(logo_path): 
+        p.drawImage(logo_path, width / 2 - inch, height - 100, width=2 * inch, height=0.75 * inch)
+        
     # Header
     p.setFont("Helvetica-Bold", 18)
     p.drawCentredString(width / 2, height - 130, "SHOFCO Gender Department Case Report")
