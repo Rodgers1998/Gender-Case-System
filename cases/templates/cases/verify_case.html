@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5 text-center">
+    <h2 class="text-success">✔ Case Verified</h2>
+    <p>This case is officially recognized by SHOFCO.</p>
+
+    <div class="card mt-4">
+        <div class="card-body">
+            <h4>Case Number: {{ case.previous_case_number }}</h4>
+            <p>Recorded on: {{ case.date_of_court_followup }}</p>
+        </div>
+    </div>
+
+    <a href="{% url 'case_detail' case.pk %}" class="btn btn-primary mt-3">Back to Case</a>
+</div>
+{% endblock %}
