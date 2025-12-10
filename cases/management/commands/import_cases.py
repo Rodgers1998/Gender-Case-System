@@ -35,7 +35,7 @@ def parse_boolean(value):
 
 
 class Command(BaseCommand):
-    help = "Stream-import Mombasa Case data from a large JSON file efficiently"
+    help = "Stream-import all Case data from a large JSON file efficiently"
 
     def add_arguments(self, parser):
         parser.add_argument('--file', type=str, default='case_occurence.json', help='Path to JSON file')
@@ -48,14 +48,12 @@ class Command(BaseCommand):
 
         try:
             with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
-                # Use ijson to stream parse the JSON array
+                # Stream parse the JSON array
                 parser = ijson.items(f, 'item')
 
                 for i, entry in enumerate(parser, start=1):
                     try:
-                        # Only import cases where county is "mombasa"
-                        if entry.get("incident_report_county_code", "").strip().lower() != "mombasa":
-                            continue
+                        # ✅ Removed Mombasa-only filter — all counties will be imported
 
                         case_id = entry.get("case_id") or entry.get("id")
                         if not case_id:
